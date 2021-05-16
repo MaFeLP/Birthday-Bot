@@ -1,0 +1,19 @@
+games:
+- 'Among Us'
+- 'Gartic Phone'
+- 'Skirbble.io'
+- 'Minecraft: BedWars'
+- 'Minecraft: Lucky Block Bedwars'
+- 'Minecraft: Murder Mystery'
+happyBirthdaySongs:
+- https://www.youtube.com/watch?v=nl62hhiBMOM
+- https://www.youtube.com/watch?v=RcVZfJO01NI
+- https://www.youtube.com/watch?v=qCJSNMqub8g
+members:
+- 1234
+listeningChannels:
+- 1234
+prefix: '!'
+authorizedAccountIDs:
+- 1234
+apiToken: <YOUR SUPER SECRET API TOKEN GOES HERE>
