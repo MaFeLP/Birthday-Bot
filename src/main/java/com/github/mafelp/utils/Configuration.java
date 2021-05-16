@@ -12,7 +12,8 @@ public class Configuration {
 
     public static YamlConfiguration config = new YamlConfiguration();
 
-    public static File configurationFile = new File("./config.yml");
+    public static File configurationFile = new File("./data/config.yml");
+    //public static File configurationFile = new File("./config.yml");
 
     public static YamlConfiguration load() {
         logger.info("Loading configuration from config.yml...");

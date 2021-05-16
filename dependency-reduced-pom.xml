@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.MaFeLP</groupId>
   <artifactId>Birthday-Bot</artifactId>
-  <version>1.1-own</version>
+  <version>1.2</version>
   <build>
     <plugins>
       <plugin>

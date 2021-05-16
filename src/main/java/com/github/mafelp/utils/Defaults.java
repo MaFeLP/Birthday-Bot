@@ -4,20 +4,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Defaults {
     private static final long[] listeningChannels = new long[] {
-            824634884802609182L, // bd Chat
-            828332839991771176L  // Test Server Chat
+            1234L
     };
 
     private static final long[] members = new long[] {
-            429194033819156481L, // Christian
-            459019618686730271L, // Max
-            689887441070719059L, // Bennet
-            699597263059812433L, // Collin
-            460071330025439233L, // Jannis
-            630475083001102336L, // Lily
-            381356301231587329L, // Marvin
-            507957898866065408L, // Mats
-            473870434690138112L  // Michel
+            1234L
     };
 
     private static final String[] games = {
@@ -36,9 +27,7 @@ public class Defaults {
     };
 
     private static final long[] authorizedAccountIDs = new long[] {
-            459019618686730271L, // MaFeLP
-            507957898866065408L, // Mats
-            473870434690138112L, // Michel
+            1234L
     };
 
 
