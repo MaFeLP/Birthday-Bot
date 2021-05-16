@@ -20,9 +20,15 @@ import java.util.List;
 public class MessageCreateListener implements org.javacord.api.listener.message.MessageCreateListener {
     private static final Random random = new Random();
     private static final Logger logger = LogManager.getLogger(MessageCreateListener.class);
+    private static long threadID = 0;
 
     @Override
     public void onMessageCreate(final MessageCreateEvent messageCreateEvent) {
+        // Changes this threads name to make it more visible to the user, what the bot is currently doing.
+        String currentThreadName = Thread.currentThread().getName();
+        Thread.currentThread().setName("MainListener-" + threadID);
+        ++threadID;
+
         if (messageCreateEvent.getMessageAuthor().isYourself()) {
             logger.debug("Message sent by this bot. Ignoring...");
             return;
@@ -84,6 +90,9 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                 logger.debug("Arguments are: null");
         } catch (NoCommandGivenException e) {
             logger.error("An error occurred while parsing the message contents." + e.getMessage());
+            logger.debug("Stack-Trace of " + e.getMessage() + ":");
+            for (var s : e.getStackTrace())
+                logger.debug(s.toString());
             return;
         } catch (CommandNotFinishedException e) {
             logger.debug("Exception caught!" ,e);
@@ -142,5 +151,8 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             UnwrapCommand unwrapCommand = new UnwrapCommand(messageCreateEvent, cmd, prefix);
             unwrapCommand.start();
         }
+
+        // Removes name changes from this thread.
+        Thread.currentThread().setName(currentThreadName);
     }
 }

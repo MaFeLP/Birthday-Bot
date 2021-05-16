@@ -93,6 +93,8 @@ public class ConfigCommand extends Thread {
                                     .addField(path, value.toString())
                     ).send(messageCreateEvent.getChannel());
                     logger.debug("Configuration entry is: " + value);
+
+                    logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config get " + path + "; Result: " + value);
                 } else {
                     logger.debug("Value to path " + path + " does not exist! Sending help embed.");
                     new MessageBuilder().setEmbed(
@@ -102,6 +104,7 @@ public class ConfigCommand extends Thread {
                                     .setAuthor(messageCreateEvent.getMessageAuthor())
                                     .setColor(Color.RED)
                     ).send(messageCreateEvent.getChannel());
+                    logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config get " + path + "; Result: Value not present");
                 }
                 // if no argument was parsed into the subcommand, give the person an error message.
             } else {
@@ -114,6 +117,8 @@ public class ConfigCommand extends Thread {
                                 .addField("Argument error","Not enough arguments given! Please use config get <path>!")
                 ).send(messageCreateEvent.getChannel());
                 logger.debug("Help embed sent.");
+
+                logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config get \"\"; Result: not enough arguments.");
             }
             logger.debug("Executed command 'config get'");
             return;
@@ -131,6 +136,7 @@ public class ConfigCommand extends Thread {
                                     .addField("Not enough arguments!","Usage: " + prefix + "config <set|get|add|remove> <path> <value>")
                     ).send(messageCreateEvent.getChannel());
             logger.debug("Help embed sent!");
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config get \"\"; Result: not enough arguments.");
             return;
         }
 
