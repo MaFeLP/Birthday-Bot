@@ -12,6 +12,7 @@ import java.util.concurrent.CompletionException;
 
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
+    protected static DiscordApi discordApi;
 
     public static void main(String[] args) {
         logger.info("Starting Birthday-Bot version 0.2-beta");
@@ -37,12 +38,12 @@ public class Main {
         logger.info("Starting bot instance...");
         logger.info("Using api token: " + Configuration.config.getString("apiToken"));
         try {
-            DiscordApi api = new DiscordApiBuilder()
+            discordApi =  new DiscordApiBuilder()
                     .setToken(Configuration.config.getString("apiToken"))
                     .addListener(MessageCreateListener::new)
                     .login().join();
             logger.info("Bot instance started! You can now execute commands.");
-            logger.info("Discord bot invite token is: " + api.createBotInvite());
+            logger.info("Discord bot invite token is: " + discordApi.createBotInvite());
         } catch (CompletionException | IllegalStateException exception) {
             logger.fatal("Invalid bot Token: " + Configuration.config.getString("apiToken"));
             logger.fatal("Please head to the config.yml file and set the value for \"apiToken:\" to your api token!");

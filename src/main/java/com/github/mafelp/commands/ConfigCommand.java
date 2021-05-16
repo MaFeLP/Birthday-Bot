@@ -14,20 +14,22 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 public class ConfigCommand extends Thread {
+    private static long threadID = 0;
     private final MessageCreateEvent messageCreateEvent;
     private final String prefix;
     private final Command command;
 
-    private static final Random random = new Random();
     private static final Logger logger = LogManager.getLogger(ConfigCommand.class);
 
     public ConfigCommand(MessageCreateEvent messageCreateEvent, Command command, String prefix) {
         this.messageCreateEvent = messageCreateEvent;
         this.prefix = prefix;
         this.command = command;
+
+        this.setName("ConfigCommand-" + threadID);
+        ++threadID;
     }
 
     @Override

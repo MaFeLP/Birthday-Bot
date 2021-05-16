@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 public class PersonCommand extends Thread {
+    private static long threadID = 0;
     private final MessageCreateEvent messageCreateEvent;
     private final List<Long> members;
 
@@ -19,6 +20,9 @@ public class PersonCommand extends Thread {
     public PersonCommand(MessageCreateEvent messageCreateEvent, List<Long> members) {
         this.messageCreateEvent = messageCreateEvent;
         this.members = members;
+
+        this.setName("PersonCommand-"+threadID);
+        ++threadID;
     }
 
     @Override

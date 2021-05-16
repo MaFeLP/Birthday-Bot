@@ -29,7 +29,17 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         }
 
         String content = messageCreateEvent.getReadableMessageContent();
-        logger.info("Message sent to channel " + messageCreateEvent.getChannel().getId() + "; " + content);
+        if (messageCreateEvent.getServer().isPresent()) {
+            if (messageCreateEvent.getChannel().asServerChannel().isPresent()) {
+                logger.info("Message sent to channel \"#" + messageCreateEvent.getChannel().asServerChannel().get().getName() + "\" on server \"" + messageCreateEvent.getServer().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+            }
+        } else if (messageCreateEvent.getChannel().asGroupChannel().isPresent()) {
+            logger.info("Message sent to group channel \"" + messageCreateEvent.getChannel().asGroupChannel().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+        } else if (messageCreateEvent.getChannel().asPrivateChannel().isPresent()) {
+            logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+        } else {
+            logger.warn("Message sent to no known channel type by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+        }
 
         if (content == null) {
             logger.debug("No content in the message!");

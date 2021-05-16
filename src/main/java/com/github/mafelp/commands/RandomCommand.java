@@ -11,6 +11,7 @@ import java.awt.*;
 import java.util.Random;
 
 public class RandomCommand extends Thread {
+    private static long threadID = 0;
     private final MessageCreateEvent messageCreateEvent;
     private final String prefix;
     private final Command command;
@@ -22,6 +23,9 @@ public class RandomCommand extends Thread {
         this.messageCreateEvent = messageCreateEvent;
         this.prefix = prefix;
         this.command = command;
+
+        this.setName("RandomCommand-" + threadID);
+        ++threadID;
     }
 
     @Override

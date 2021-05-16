@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 
 public class GameCommand extends Thread {
+    private static long threadID = 0;
+
     private final MessageCreateEvent messageCreateEvent;
     private final List<String> games;
 
@@ -19,6 +21,9 @@ public class GameCommand extends Thread {
     public GameCommand(MessageCreateEvent messageCreateEvent, List<String> games) {
         this.messageCreateEvent = messageCreateEvent;
         this.games = games;
+
+        this.setName("GameCommand-" + threadID);
+        ++threadID;
     }
 
     @Override
