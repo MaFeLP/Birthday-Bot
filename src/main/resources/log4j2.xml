@@ -21,5 +21,25 @@
         <Logger name="com.github.mafelp.utils.Configuration" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+
+        <!--Command Executors-->
+        <Logger name="com.github.mafelp.commands.ConfigCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.github.mafelp.commands.GameCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.github.mafelp.commands.PersonCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.github.mafelp.commands.RandomCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.github.mafelp.commands.SkribblCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.github.mafelp.commands.UnwrapCommand" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
     </Loggers>
 </Configuration>
