@@ -64,6 +64,7 @@
                 <exclude>META-INF/*.SF</exclude>
                 <exclude>META-INF/*.DSA</exclude>
                 <exclude>META-INF/*.RSA</exclude>
+                <exclude>log4j2-test.xml</exclude>
               </excludes>
             </filter>
           </filters>

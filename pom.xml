@@ -47,6 +47,8 @@
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
+                                <!-- Delete/Comment the following line to enable debug logging. -->
+                                <exclude>log4j2-test.xml</exclude>
                             </excludes>
                         </filter>
                     </filters>
@@ -136,12 +138,6 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.28</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>-->
     </dependencies>
 
     <properties>
