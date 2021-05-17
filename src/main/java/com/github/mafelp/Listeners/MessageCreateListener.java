@@ -34,6 +34,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             return;
         }
 
+        boolean messageSentToAllowedChannel = false;
         String content = messageCreateEvent.getReadableMessageContent();
         if (messageCreateEvent.getServer().isPresent()) {
             if (messageCreateEvent.getChannel().asServerChannel().isPresent()) {
@@ -43,6 +44,11 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             logger.info("Message sent to group channel \"" + messageCreateEvent.getChannel().asGroupChannel().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         } else if (messageCreateEvent.getChannel().asPrivateChannel().isPresent()) {
             logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+            logger.debug("Channel found as private message. Letting it pass.");
+
+            if (Configuration.config.getBoolean("allowPrivateMessages")){
+                messageSentToAllowedChannel = true;
+            }
         } else {
             logger.warn("Message sent to no known channel type by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         }
@@ -52,17 +58,15 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             return;
         }
 
-        boolean cont = false;
-        for (long channelID :
-                Configuration.config.getLongList("listeningChannels")) {
-            if (channelID == messageCreateEvent.getChannel().getId()) {
-                cont = true;
-                logger.debug("Channel found in configuration: listeningChannels");
-                break;
+        if (!messageSentToAllowedChannel) {
+            for (long channelID :
+                    Configuration.config.getLongList("listeningChannels")) {
+                if (channelID == messageCreateEvent.getChannel().getId()) {
+                    logger.debug("Channel found in configuration: listeningChannels");
+                    break;
+                }
             }
-        }
 
-        if (!cont) {
             logger.debug("Message was not sent to an allowed channel. Ignoring it.");
             return;
         }

@@ -30,7 +30,6 @@ public class Defaults {
             1234L
     };
 
-
     public static YamlConfiguration createDefaultConfig () {
         YamlConfiguration yamlConfiguration = new YamlConfiguration();
         yamlConfiguration.set("games", games);
@@ -38,6 +37,7 @@ public class Defaults {
         yamlConfiguration.set("members", members);
         yamlConfiguration.set("listeningChannels", listeningChannels);
         yamlConfiguration.set("prefix", "!");
+        yamlConfiguration.set("allowPrivateMessages",true);
         yamlConfiguration.set("authorizedAccountIDs", authorizedAccountIDs);
         yamlConfiguration.set("apiToken", "<Your Token goes here>");
 
