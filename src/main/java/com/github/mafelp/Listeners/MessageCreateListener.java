@@ -44,9 +44,9 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             logger.info("Message sent to group channel \"" + messageCreateEvent.getChannel().asGroupChannel().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         } else if (messageCreateEvent.getChannel().asPrivateChannel().isPresent()) {
             logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
-            logger.debug("Channel found as private message. Letting it pass.");
 
             if (Configuration.config.getBoolean("allowPrivateMessages")){
+                logger.debug("Channel found as private message. Letting it pass.");
                 messageSentToAllowedChannel = true;
             }
         } else {
@@ -59,16 +59,18 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         }
 
         if (!messageSentToAllowedChannel) {
-            for (long channelID :
-                    Configuration.config.getLongList("listeningChannels")) {
+            for (long channelID : Configuration.config.getLongList("listeningChannels")) {
                 if (channelID == messageCreateEvent.getChannel().getId()) {
                     logger.debug("Channel found in configuration: listeningChannels");
+                    messageSentToAllowedChannel = true;
                     break;
                 }
             }
 
-            logger.debug("Message was not sent to an allowed channel. Ignoring it.");
-            return;
+            if (!messageSentToAllowedChannel) {
+                logger.debug("Message was not sent to an allowed channel. Ignoring it.");
+                return;
+            }
         }
 
         List<Long> members = Configuration.config.getLongList("members");
@@ -76,14 +78,12 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         List<String> happyBirthdaySongs = Configuration.config.getStringList("happyBirthdaySongs");
         String prefix = Configuration.config.getString("prefix");
 
-        logger.debug(messageCreateEvent.getMessageAuthor().getName() + " sent message " + content);
         if (prefix != null && !content.startsWith(prefix)) {
             logger.debug("Message not a command. Ignoring it.");
             return;
         }
 
         Command cmd = null;
-
         try {
             cmd = CommandParser.parseFromString(content);
             logger.debug("Command is: " + cmd.getCommand());
@@ -96,7 +96,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             logger.error("An error occurred while parsing the message contents." + e.getMessage());
             logger.debug("Stack-Trace of " + e.getMessage() + ":");
             for (var s : e.getStackTrace())
-                logger.debug(s.toString());
+                logger.debug("\t" + s.toString());
             return;
         } catch (CommandNotFinishedException e) {
             logger.debug("Exception caught!" ,e);
