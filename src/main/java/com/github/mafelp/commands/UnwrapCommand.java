@@ -31,7 +31,9 @@ public class UnwrapCommand extends Thread {
                 .setAuthor(messageCreateEvent.getMessageAuthor())
                 .setTitle("Error!")
                 .setDescription("No Presents are configured for this birthday!")
-                .setFooter("Upgrade to version 1.3 or higher for present support.")
+                .setFooter("Upgrade to version 1.4 or higher for present support.")
         );
+
+        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Command not available.");
     }
 }

@@ -57,7 +57,7 @@ public class RandomCommand extends Thread {
                             .setAuthor(messageCreateEvent.getMessageAuthor())
             ).send(messageCreateEvent.getChannel());
 
-            logger.info(messageCreateEvent.getMessageAuthor().getName() + " executed command random.");
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"random\"; Response: Random output chosen: \"" + command.getStringArgument(r).get() + "\"");
         } else {
             new MessageBuilder().setEmbed(
                     new EmbedBuilder()
@@ -67,7 +67,7 @@ public class RandomCommand extends Thread {
                             .addField("Unknown Error", "An unknown error occurred. Please try again!")
             );
 
-            logger.warn("Something went wrong while " + messageCreateEvent.getMessageAuthor().getName() + " tried to execute command random.");
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"random\"; Response: Error getting the string argument.");
         }
     }
 }

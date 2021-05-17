@@ -30,6 +30,8 @@ public class PersonCommand extends Thread {
         logger.debug("Executing command person...");
         int r = random.nextInt(members.size());
 
+        long person = members.get(r);
+
         logger.debug("Sending reply...");
         messageCreateEvent.getChannel().sendMessage(
                 new EmbedBuilder()
@@ -41,6 +43,6 @@ public class PersonCommand extends Thread {
         );
         logger.debug("Reply sent.");
 
-        logger.debug("Executed command person.");
+        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"person\"; Response: Person chosen with ID: \"" + person + "\"");
     }
 }

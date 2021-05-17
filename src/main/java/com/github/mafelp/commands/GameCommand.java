@@ -31,15 +31,17 @@ public class GameCommand extends Thread {
         logger.debug("Executing command game...");
         int r = random.nextInt(games.size());
 
+        String game = games.get(r);
+
         logger.debug("Sending reply...");
         messageCreateEvent.getChannel().sendMessage(
                 new EmbedBuilder()
                         .setAuthor(messageCreateEvent.getMessageAuthor())
-                        .addField("Game Chosen", games.get(r))
+                        .addField("Game Chosen", game)
                         .setColor(Color.GREEN)
         );
 
         logger.debug("Reply sent.");
-        logger.debug("Executed command game.");
+        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"game\"; Response: Game Chosen: \"" + game + "\"");
     }
 }

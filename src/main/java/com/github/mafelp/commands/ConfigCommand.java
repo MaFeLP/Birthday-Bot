@@ -38,25 +38,18 @@ public class ConfigCommand extends Thread {
         logger.debug("Checking authority of user...");
         // Check authorization status of sender
         boolean authorized = false;
-
         if (messageCreateEvent.getMessageAuthor().isBotOwner()) {
             logger.debug("User "+ messageCreateEvent.getMessageAuthor().getName() + " is authorized as bot owner.");
             authorized = true;
-        }
-
-        if (messageCreateEvent.getMessageAuthor().isServerAdmin()) {
+        } else if (messageCreateEvent.getMessageAuthor().isServerAdmin()) {
             logger.debug("User "+ messageCreateEvent.getMessageAuthor().getName() + " is authorized as server admin.");
             authorized = true;
-        }
-
-        for (long id :
-                Configuration.config.getLongList("authorizedAccountIDs")) {
+        } else for (long id : Configuration.config.getLongList("authorizedAccountIDs")) {
             if (id == messageCreateEvent.getMessageAuthor().getId()) {
                 logger.debug("User " + messageCreateEvent.getMessageAuthor().getName() + " is in authorized accounts list..");
                 authorized = true;
             }
         }
-
         if (!authorized) {
             logger.warn("User " + messageCreateEvent.getMessageAuthor().getName() + "(" + messageCreateEvent.getMessageAuthor().getId() + ")" + " tried to execute the config command!");
             logger.debug("Sending error reply...");
@@ -72,8 +65,8 @@ public class ConfigCommand extends Thread {
             return;
         }
 
+        // Start checking for arguments.
         Command subCommand = CommandParser.parseFromArray(command.getArguments());
-
         if (subCommand.getStringArgument(0).isEmpty()) {
             logger.debug("Person passed not enough arguments into the command. Sending help embed.");
             new MessageBuilder().setEmbed(
@@ -141,6 +134,7 @@ public class ConfigCommand extends Thread {
             return;
         }
 
+        // Switch the subcommand. For example set, add, remove.
         switch (subCommand.getCommand().toLowerCase(Locale.ROOT)) {
             // subcommand set:
             // sets a value in the configuration to the specified value
