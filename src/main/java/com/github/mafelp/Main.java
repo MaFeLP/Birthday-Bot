@@ -21,7 +21,7 @@ public class Main {
 
         Configuration.load();
 
-        if (!Configuration.configurationFile.exists())
+        if (!Configuration.globalConfigurationFile.exists())
             Configuration.save();
 
         logger.debug("Current configuration is: \n" + Configuration.config.saveToString());

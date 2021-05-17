@@ -43,4 +43,16 @@ public class Defaults {
 
         return yamlConfiguration;
     }
+
+    public static YamlConfiguration createDefaultServerConfiguration() {
+        YamlConfiguration yamlConfiguration = new YamlConfiguration();
+        yamlConfiguration.set("games", games);
+        yamlConfiguration.set("happyBirthdaySongs", happyBirthdaySongs);
+        yamlConfiguration.set("members", members);
+        yamlConfiguration.set("listeningChannels", listeningChannels);
+        yamlConfiguration.set("prefix", "!");
+        yamlConfiguration.set("authorizedAccountIDs", authorizedAccountIDs);
+
+        return yamlConfiguration;
+    }
 }

@@ -5,8 +5,10 @@ import com.github.mafelp.utils.CommandParser;
 import com.github.mafelp.utils.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.awt.*;
@@ -16,17 +18,25 @@ import java.util.List;
 import java.util.Locale;
 
 public class ConfigCommand extends Thread {
+    private static final Logger logger = LogManager.getLogger(ConfigCommand.class);
+
     private static long threadID = 0;
     private final MessageCreateEvent messageCreateEvent;
     private final String prefix;
     private final Command command;
 
-    private static final Logger logger = LogManager.getLogger(ConfigCommand.class);
+    private final Server server;
 
     public ConfigCommand(MessageCreateEvent messageCreateEvent, Command command, String prefix) {
         this.messageCreateEvent = messageCreateEvent;
         this.prefix = prefix;
         this.command = command;
+
+        if (messageCreateEvent.getServer().isPresent()) {
+            server = messageCreateEvent.getServer().get();
+        } else {
+            server = null;
+        }
 
         this.setName("ConfigCommand-" + threadID);
         ++threadID;
@@ -34,6 +44,22 @@ public class ConfigCommand extends Thread {
 
     @Override
     public void run() {
+        // Check if message was sent on a Server
+        if (server == null) {
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" tried to access the configuration, while not executing the command on a server!");
+            logger.debug("Sending error embed...");
+            messageCreateEvent.getChannel().sendMessage(
+                    new EmbedBuilder()
+                    .setTitle("Error!")
+                    .setColor(Color.RED)
+                    .setAuthor(messageCreateEvent.getMessageAuthor())
+                    .setDescription("You cannot access the configuration, when you are not on a Server!")
+            );
+            return;
+        }
+
+        YamlConfiguration configuration = Configuration.getServerConfiguration(server);
+
         logger.debug("Executing config command...");
         logger.debug("Checking authority of user...");
         // Check authorization status of sender
@@ -44,7 +70,7 @@ public class ConfigCommand extends Thread {
         } else if (messageCreateEvent.getMessageAuthor().isServerAdmin()) {
             logger.debug("User "+ messageCreateEvent.getMessageAuthor().getName() + " is authorized as server admin.");
             authorized = true;
-        } else for (long id : Configuration.config.getLongList("authorizedAccountIDs")) {
+        } else for (long id : configuration.getLongList("authorizedAccountIDs")) {
             if (id == messageCreateEvent.getMessageAuthor().getId()) {
                 logger.debug("User " + messageCreateEvent.getMessageAuthor().getName() + " is in authorized accounts list..");
                 authorized = true;
@@ -90,7 +116,7 @@ public class ConfigCommand extends Thread {
         if (subCommand.getCommand().equalsIgnoreCase("get")) {
             logger.debug("Executing subcommand get...");
             // if there is a argument after get, execute.
-            Object value = Configuration.config.get(path);
+            Object value = configuration.get(path);
 
             logger.debug("Getting the configuration entry to " + path);
             if (value != null) {
@@ -143,17 +169,17 @@ public class ConfigCommand extends Thread {
                 if (subCommand.getBooleanArgument(1).isPresent()) {
                     boolean boolValue = subCommand.getBooleanArgument(1).get();
                     logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config set " + path + "\"; Result: Set Configuration entry " + path + " to: " + boolValue);
-                    Configuration.config.set(path, boolValue);
+                    configuration.set(path, boolValue);
                     // Checks if the argument is a number (long)
                 } else if (subCommand.getLongArgument(1).isPresent()) {
                     long longValue = subCommand.getLongArgument(1).get();
                     logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config set " + path + "\"; Result: Set Configuration entry " + path + " to: " + longValue);
-                    Configuration.config.set(path, longValue);
+                    configuration.set(path, longValue);
                     // the last check is, if the argument is a String.
                 } else if (subCommand.getStringArgument(1).isPresent()) {
                     String stringValue = subCommand.getStringArgument(1).get();
                     logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config set " + path + "\"; Result: Set Configuration entry " + path + " to: " + stringValue);
-                    Configuration.config.set(path, stringValue);
+                    configuration.set(path, stringValue);
                     // If the argument could not be parsed, we throw an error.
                 } else {
                     logger.error("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"config set " + path + "\"; Unknown Error parsing value.");
@@ -190,25 +216,25 @@ public class ConfigCommand extends Thread {
                 if (subCommand.getBooleanArgument(1).isPresent()) {
                     boolean boolValue = subCommand.getBooleanArgument(1).get();
                     logger.debug("Adding boolean value " + boolValue + " to " + path);
-                    List<Boolean> booleanList = Configuration.config.getBooleanList(path);
+                    List<Boolean> booleanList = configuration.getBooleanList(path);
                     booleanList.add(boolValue);
-                    Configuration.config.set(path, booleanList);
+                    configuration.set(path, booleanList);
                     logger.debug("Set " + path + " to " + booleanList);
                     // Checks if the argument is a number (long)
                 } else if (subCommand.getLongArgument(1).isPresent()) {
                     long longValue = subCommand.getLongArgument(1).get();
                     logger.debug("Adding boolean value " + longValue + " to " + path);
-                    List<Long> longList = Configuration.config.getLongList(path);
+                    List<Long> longList = configuration.getLongList(path);
                     longList.add(longValue);
-                    Configuration.config.set(path, longList);
+                    configuration.set(path, longList);
                     logger.debug("Set " + path + " to " + longList);
                     // the last check is, if the argument is a String.
                 } else if (subCommand.getStringArgument(1).isPresent()) {
                     String stringValue = subCommand.getStringArgument(1).get();
                     logger.debug("Adding boolean value " + stringValue + " to " + path);
-                    List<String> stringList = Configuration.config.getStringList(path);
+                    List<String> stringList = configuration.getStringList(path);
                     stringList.add(stringValue);
-                    Configuration.config.set(path, stringList);
+                    configuration.set(path, stringList);
                     logger.debug("Set " + path + " to " + stringList);
                 }
                 // Send a success message
@@ -218,7 +244,7 @@ public class ConfigCommand extends Thread {
                                     .setColor(Color.GREEN)
                                     .setAuthor(messageCreateEvent.getMessageAuthor())
                                     .setTitle("Success!")
-                                    .addField("Setting config entry", "Successfully saved the config entry " + subCommand.getStringArgument(0).get() + " to " + Configuration.config.getStringList(subCommand.getStringArgument(0).get()))
+                                    .addField("Setting config entry", "Successfully saved the config entry " + subCommand.getStringArgument(0).get() + " to " + configuration.getStringList(subCommand.getStringArgument(0).get()))
                     ).send(messageCreateEvent.getChannel());
                 }
 
@@ -234,25 +260,25 @@ public class ConfigCommand extends Thread {
                 if (subCommand.getBooleanArgument(1).isPresent()) {
                     boolean boolValue = subCommand.getBooleanArgument(1).get();
                     logger.debug("Removing " + boolValue + " from " + path);
-                    List<Boolean> booleanList = Configuration.config.getBooleanList(path);
+                    List<Boolean> booleanList = configuration.getBooleanList(path);
                     booleanList.removeAll(Collections.singleton(boolValue));
-                    Configuration.config.set(path, booleanList);
+                    configuration.set(path, booleanList);
                     logger.debug(path + " is now set to: " + booleanList);
                     // Checks if the argument is a number (long)
                 } else if (subCommand.getLongArgument(1).isPresent()) {
                     long longValue = subCommand.getLongArgument(1).get();
                     logger.debug("Removing " + longValue + " from " + path);
-                    List<Long> longList = Configuration.config.getLongList(path);
+                    List<Long> longList = configuration.getLongList(path);
                     longList.removeAll(Collections.singleton(longValue));
-                    Configuration.config.set(path, longList);
+                    configuration.set(path, longList);
                     logger.debug(path + " is now set to: " + longList);
                     // the last check is, if the argument is a String.
                 } else if (subCommand.getStringArgument(1).isPresent()) {
                     String stringValue = subCommand.getStringArgument(1).get();
                     logger.debug("Removing " + stringValue + " from " + path);
-                    List<String> stringList = Configuration.config.getStringList(path);
+                    List<String> stringList = configuration.getStringList(path);
                     stringList.removeAll(Collections.singleton(stringValue));
-                    Configuration.config.set(path, stringList);
+                    configuration.set(path, stringList);
                     logger.debug(path + " is now set to: " + stringList);
                 }
                 // Send a success message
@@ -286,7 +312,7 @@ public class ConfigCommand extends Thread {
 
         logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" (ID: " + messageCreateEvent.getMessageAuthor().getIdAsString() + ") changed the configuration!");
 
-        Configuration.save();
+        Configuration.save(server);
     }
 }
 
