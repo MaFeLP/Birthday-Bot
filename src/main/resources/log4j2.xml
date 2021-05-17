@@ -2,44 +2,28 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout disableANSI="false" pattern="%highlight{%d{HH:mm:ss} [ %t/%-5level]:\t %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=green bold, TRACE=blue}"/>
+            <PatternLayout disableANSI="false" pattern="%highlight{%d{HH:mm:ss} [%t/%-5level]:\t %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=white, DEBUG=green bold, TRACE=blue}"/>
         </Console>
+        <RollingFile name="LogFile" fileName="logs/latest.log"
+                     filePattern="logs/log-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d{HH:mm:ss} [%t/%-5level]:\t %msg%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <OnStartupTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Root Level="error">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="com.github.mafelp.Main" level="info" additivity="false">
+        <Logger name="com.github.mafelp" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.configuration.YamlConfiguration" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.Listeners.MessageCreateListener" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.utils.Configuration" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-
-        <!--Command Executors-->
-        <Logger name="com.github.mafelp.commands.ConfigCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.commands.GameCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.commands.PersonCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.commands.RandomCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.commands.SkribblCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-        <Logger name="com.github.mafelp.commands.UnwrapCommand" level="INFO" additivity="false">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="LogFile"/>
         </Logger>
     </Loggers>
 </Configuration>
