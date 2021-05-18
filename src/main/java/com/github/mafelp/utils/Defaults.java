@@ -17,7 +17,8 @@ public class Defaults {
             "Skirbble.io",
             "Minecraft: BedWars",
             "Minecraft: Lucky Block Bedwars",
-            "Minecraft: Murder Mystery"
+            "Minecraft: Murder Mystery",
+            "Codenames"
     };
 
     private static final String[] happyBirthdaySongs = {
