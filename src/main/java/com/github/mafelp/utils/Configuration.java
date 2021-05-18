@@ -87,7 +87,7 @@ public class Configuration {
         return serverConfigurations.get(server);
     }
 
-    public static YamlConfiguration save(@NotNull Server server) {
+    public static YamlConfiguration save(@NotNull Server server, @NotNull YamlConfiguration configurationToSave) {
         long serverID = server.getId();
 
         File serverConfigurationFileFolder = new File(configurationFilesFolder, serverID + "");
@@ -95,7 +95,7 @@ public class Configuration {
 
         try {
             logger.debug("Saving configuration file " + serverConfigurationFile.getAbsolutePath());
-            getServerConfiguration(server).save(serverConfigurationFile);
+            configurationToSave.save(serverConfigurationFile);
             logger.debug("Saved configuration file " + serverConfigurationFile.getAbsolutePath());
         } catch (IOException e) {
             logger.error("Could not save configuration for server " + server.getName(), e);

@@ -8,6 +8,7 @@ import com.github.mafelp.utils.exceptions.CommandNotFinishedException;
 import com.github.mafelp.utils.exceptions.NoCommandGivenException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -40,6 +41,69 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             if (messageCreateEvent.getChannel().asServerChannel().isPresent()) {
                 logger.info("Message sent to channel \"#" + messageCreateEvent.getChannel().asServerChannel().get().getName() + "\" on server \"" + messageCreateEvent.getServer().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
             }
+
+            List<Long> listeningChannels = Configuration.getServerConfiguration(messageCreateEvent.getServer().get()).getLongList("listeningChannels");
+            String listeningChannelsFromArray = listeningChannels.toString();
+            logger.debug("listeningChannelsList: " + listeningChannelsFromArray);
+
+            // If the list of listening channels is the default, check if the message is !init,
+            // Then add this channel to the listening channels.
+            if (listeningChannelsFromArray.equalsIgnoreCase("[1234]")) {
+                logger.debug("Checking authority of user...");
+                // Check authorization status of sender
+                boolean authorized = false;
+                if (messageCreateEvent.getMessageAuthor().isBotOwner()) {
+                    logger.debug("User "+ messageCreateEvent.getMessageAuthor().getName() + " is authorized as bot owner.");
+                    authorized = true;
+                } else if (messageCreateEvent.getMessageAuthor().isServerAdmin()) {
+                    logger.debug("User " + messageCreateEvent.getMessageAuthor().getName() + " is authorized as server admin.");
+                    authorized = true;
+                }
+
+                if (content.toLowerCase().startsWith("!init")) {
+                //if (content.toLowerCase().startsWith(Configuration.getServerConfiguration(messageCreateEvent.getServer().get()).getString("prefix") + "init")) {
+                    if (authorized) {
+                        listeningChannels = new ArrayList<>();
+                        listeningChannels.add(messageCreateEvent.getChannel().getId());
+                        logger.debug("listeningChannelsList now: " + listeningChannels.toString());
+                        YamlConfiguration currentConfig = Configuration.getServerConfiguration(messageCreateEvent.getServer().get());
+                        currentConfig.set("listeningChannels", listeningChannels);
+                        Configuration.save(messageCreateEvent.getServer().get(), currentConfig);
+
+                        messageCreateEvent.getChannel().sendMessage(
+                                new EmbedBuilder()
+                                .setColor(Color.GREEN)
+                                .setAuthor(messageCreateEvent.getMessageAuthor())
+                                .setTitle("Success!")
+                                .setDescription("Successfully added channel <#" + messageCreateEvent.getChannel().getId() + "> to the list of listening channels and disabled command \"!init\". You can now use this channel to send commands to the discord bot.")
+                                .addField("Add more channels", "To add more channels to the list of listening channels, get the id of a channel, head over to https://mafelp.github.io/MCDC/get-channel-ID and follow the steps over there. Instead of executing the command as a player or in the console, execute the following command: \"!config add listeningChannels <THE CHANNEL ID>\"")
+                        );
+
+                        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"!init\"; Response: Added channel with id \"" + messageCreateEvent.getChannel().getId() + "\" to the list of listening channels.");
+                    } else {
+                        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"!init\"; Response: Permission denied.");
+                        logger.debug("Sending permission denied Embed.");
+                        messageCreateEvent.getChannel().sendMessage(
+                                new EmbedBuilder()
+                                .setColor(Color.RED)
+                                .setAuthor(messageCreateEvent.getMessageAuthor())
+                                .setTitle("Permission denied!")
+                                .setDescription("Sorry, only the server admin, can use this command, if no channels were configured.")
+                        );
+                        logger.debug("Permission denied Embed sent!");
+                        return;
+                    }
+                } // End of !init command.
+            // If the list of channel IDs does not have the default, get through it and look, if this channel is in it.
+            } else {
+                for (long channelID : listeningChannels) {
+                    if (channelID == messageCreateEvent.getChannel().getId()) {
+                        logger.debug("Channel found in configuration: listeningChannels");
+                        messageSentToAllowedChannel = true;
+                        break;
+                    }
+                }
+            }
         } else if (messageCreateEvent.getChannel().asGroupChannel().isPresent()) {
             logger.info("Message sent to group channel \"" + messageCreateEvent.getChannel().asGroupChannel().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         } else if (messageCreateEvent.getChannel().asPrivateChannel().isPresent()) {
@@ -59,18 +123,8 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         }
 
         if (!messageSentToAllowedChannel) {
-            for (long channelID : Configuration.config.getLongList("listeningChannels")) {
-                if (channelID == messageCreateEvent.getChannel().getId()) {
-                    logger.debug("Channel found in configuration: listeningChannels");
-                    messageSentToAllowedChannel = true;
-                    break;
-                }
-            }
-
-            if (!messageSentToAllowedChannel) {
-                logger.debug("Message was not sent to an allowed channel. Ignoring it.");
-                return;
-            }
+            logger.debug("Message was not sent to an allowed channel. Ignoring it.");
+            return;
         }
 
         List<Long> members = Configuration.config.getLongList("members");

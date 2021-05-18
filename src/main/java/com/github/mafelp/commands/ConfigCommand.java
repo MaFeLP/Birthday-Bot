@@ -194,19 +194,6 @@ public class ConfigCommand extends Thread {
                     logger.debug("Help embed sent.");
                     return;
                 }
-
-                Configuration.save();
-
-                // Send a success message
-                logger.debug("Sending success embed...");
-                new MessageBuilder().setEmbed(
-                        new EmbedBuilder()
-                                .setTitle("Success!")
-                                .addField("Saving config", "Successfully saved and reloaded the configuration file.")
-                                .setColor(Color.GREEN)
-                                .setAuthor(messageCreateEvent.getMessageAuthor())
-                ).send(messageCreateEvent.getChannel());
-                logger.debug("Success embed sent!");
             }
             // subcommand add
             // adds a value to a list.
@@ -312,7 +299,16 @@ public class ConfigCommand extends Thread {
 
         logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" (ID: " + messageCreateEvent.getMessageAuthor().getIdAsString() + ") changed the configuration!");
 
-        Configuration.save(server);
+        Configuration.save(server, configuration);
+        // Send a success message
+        logger.debug("Sending success embed...");
+        new MessageBuilder().setEmbed(
+                new EmbedBuilder()
+                        .setTitle("Success!")
+                        .addField("Saving config", "Successfully saved and reloaded the configuration file.")
+                        .setColor(Color.GREEN)
+                        .setAuthor(messageCreateEvent.getMessageAuthor())
+        ).send(messageCreateEvent.getChannel());
+        logger.debug("Success embed sent!");
     }
 }
-
