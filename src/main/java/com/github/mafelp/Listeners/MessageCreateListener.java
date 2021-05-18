@@ -65,7 +65,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                     if (authorized) {
                         listeningChannels = new ArrayList<>();
                         listeningChannels.add(messageCreateEvent.getChannel().getId());
-                        logger.debug("listeningChannelsList now: " + listeningChannels.toString());
+                        logger.debug("listeningChannelsList now: " + listeningChannels);
                         YamlConfiguration currentConfig = Configuration.getServerConfiguration(messageCreateEvent.getServer().get());
                         currentConfig.set("listeningChannels", listeningChannels);
                         Configuration.save(messageCreateEvent.getServer().get(), currentConfig);
