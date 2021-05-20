@@ -12,6 +12,8 @@ WORKDIR /tmp/build
 # Add the source files to the build directory
 ADD . /tmp/build/
 
+# Removes the logging configuration which enables debug logging.
+RUN rm /tmp/build/src/main/resources/log4j2-test.xml
 # Compile the Bot
 RUN mvn clean verify
 

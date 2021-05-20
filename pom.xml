@@ -47,8 +47,6 @@
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
-                                <!-- Delete/Comment the following line to enable debug logging. -->
-                                <!--<exclude>log4j2-test.xml</exclude>-->
                             </excludes>
                         </filter>
                     </filters>
