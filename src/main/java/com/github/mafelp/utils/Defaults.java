@@ -53,6 +53,7 @@ public class Defaults {
         yamlConfiguration.set("listeningChannels", listeningChannels);
         yamlConfiguration.set("prefix", "!");
         yamlConfiguration.set("authorizedAccountIDs", authorizedAccountIDs);
+        yamlConfiguration.set("skribbl.addReaction", true);
 
         return yamlConfiguration;
     }

@@ -1,6 +1,7 @@
 package com.github.mafelp;
 
 import com.github.mafelp.Listeners.MessageCreateListener;
+import com.github.mafelp.Listeners.SkribblListener;
 import com.github.mafelp.utils.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +42,7 @@ public class Main {
             discordApi =  new DiscordApiBuilder()
                     .setToken(Configuration.config.getString("apiToken"))
                     .addListener(MessageCreateListener::new)
+                    .addListener(SkribblListener::new)
                     .login().join();
             logger.info("Bot instance started! You can now execute commands.");
             logger.info("Discord bot invite token is: " + discordApi.createBotInvite());

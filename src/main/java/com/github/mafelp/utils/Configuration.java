@@ -19,12 +19,12 @@ public class Configuration {
     private static final Map<Server, YamlConfiguration> serverConfigurations = new HashMap<>();
 
     // Normal use
-    public static File globalConfigurationFile = new File("config.yml");
-    public static File configurationFilesFolder = new File("server-configurations");
+    // public static File globalConfigurationFile = new File("config.yml");
+    // public static File configurationFilesFolder = new File("server-configurations");
 
     // Development usage
-    // public static File globalConfigurationFile = new File("data/config.yml");
-    // public static File configurationFilesFolder = new File("data/server-configurations");
+    public static File globalConfigurationFile = new File("data/config.yml");
+    public static File configurationFilesFolder = new File("data/server-configurations");
 
     public static YamlConfiguration load() {
         logger.info("Loading configuration from config.yml...");
@@ -48,20 +48,30 @@ public class Configuration {
         return config;
     }
 
-    public static YamlConfiguration getServerConfiguration(@NotNull Server server) {
-        long serverID = server.getId();
-
-        File serverConfigurationFileFolder = new File(configurationFilesFolder, serverID + "");
-        File serverConfigurationFile = new File(serverConfigurationFileFolder, "config.yml");
+    public static File getServerConfigurationFolder(@NotNull Server server) {
+        File serverConfigurationFileFolder = new File(configurationFilesFolder, server.getId() + "");
 
         if (!serverConfigurationFileFolder.exists()) {
             if (serverConfigurationFileFolder.mkdirs()){
                 logger.debug("Created new Folder: " + serverConfigurationFileFolder.getAbsolutePath());
             } else {
                 logger.error("Could not create folder: " + serverConfigurationFileFolder.getAbsolutePath());
-                return Defaults.createDefaultServerConfiguration();
+                return null;
             }
         }
+
+        return serverConfigurationFileFolder;
+    }
+
+    public static YamlConfiguration getServerConfiguration(@NotNull Server server) {
+        long serverID = server.getId();
+
+        File serverConfigurationFileFolder = getServerConfigurationFolder(server);
+
+        if (serverConfigurationFileFolder == null)
+            return Defaults.createDefaultServerConfiguration();
+
+        File serverConfigurationFile = new File(serverConfigurationFileFolder, "config.yml");
 
         if (serverConfigurationFile.exists()) {
             YamlConfiguration configuration = YamlConfiguration.loadConfiguration(serverConfigurationFile);
