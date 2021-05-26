@@ -41,6 +41,7 @@ public class Defaults {
         yamlConfiguration.set("allowPrivateMessages",true);
         yamlConfiguration.set("authorizedAccountIDs", authorizedAccountIDs);
         yamlConfiguration.set("apiToken", "<Your Token goes here>");
+        yamlConfiguration.set("skribbl.addReaction", true);
 
         return yamlConfiguration;
     }
@@ -54,6 +55,7 @@ public class Defaults {
         yamlConfiguration.set("prefix", "!");
         yamlConfiguration.set("authorizedAccountIDs", authorizedAccountIDs);
         yamlConfiguration.set("skribbl.addReaction", true);
+        yamlConfiguration.set("skribbl.sendWordsOnEnd", true);
 
         return yamlConfiguration;
     }

@@ -16,7 +16,7 @@ public class Main {
     protected static DiscordApi discordApi;
 
     public static void main(String[] args) {
-        logger.info("Starting Birthday-Bot version 0.2-beta");
+        logger.info("Starting Birthday-Bot version 1.4-beta");
 
         logger.info("loading configuration...");
 

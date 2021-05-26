@@ -15,6 +15,8 @@ public class SkribblManager {
 
     private static final Map<Server, List<String>> skribblWordMap = new HashMap<>();
 
+    private static final File globalSkribblFile = new File(Configuration.configurationFilesFolder, "defaultSkribblWords.txt");
+
     public static List<String> getSkribblWords(Server server) {
         if (skribblWordMap.get(server) != null) {
             return skribblWordMap.get(server);
@@ -117,5 +119,15 @@ public class SkribblManager {
             skribblWordMap.replace(server, words);
         }
         return skribblWordMap.get(server);
+    }
+
+    public static void resetSkribblWords(Server server) {
+        var oldWords = getSkribblWords(server);
+
+        logger.debug("Old Skribbl words were: " + oldWords);
+
+        skribblWordMap.put(server, new ArrayList<>());
+        logger.debug("Saving the new words to the file.");
+        saveSkribblWords(server);
     }
 }

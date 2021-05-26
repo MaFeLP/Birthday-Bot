@@ -67,11 +67,11 @@ public class SkribblListener extends MessageCreateListener {
                 }
             }
 
-            if (Configuration.getServerConfiguration(server).getBoolean("skribbl.addReaction", true))
+            if (Configuration.getServerConfiguration(server).getBoolean("skribbl.addReaction", true) && Configuration.config.getBoolean("skribbl.addReaction", true))
                 messageCreateEvent.addReactionToMessage(EmojiParser.parseToUnicode(":white_check_mark:"));
         } catch (CommandNotFinishedException | NoCommandGivenException e) {
             logger.debug("NoCommandGiven exception", e);
-            if (Configuration.getServerConfiguration(server).getBoolean("skribbl.addReaction", true))
+            if (Configuration.getServerConfiguration(server).getBoolean("skribbl.addReaction", true) && Configuration.config.getBoolean("skribbl.addReaction", true))
                 messageCreateEvent.addReactionToMessage(EmojiParser.parseToUnicode(":negative_squared_cross_mark:"));
         }
     }
