@@ -47,8 +47,6 @@ public class SkribblCommand extends Thread{
             return;
         }
 
-
-
         switch (command.getStringArgument(0).get().toLowerCase(Locale.ROOT)) {
             case "start" -> {
                 SkribblListener.addListeningChannel(messageCreateEvent.getServerTextChannel().get());
@@ -105,30 +103,20 @@ public class SkribblCommand extends Thread{
                 messageCreateEvent.getServerTextChannel().get().sendMessage("Skribbl word list.", skribblFile);
                 logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl get\"; Response: " + words);
             }
-            case "reset", "clear" -> {
-//                messageCreateEvent.getChannel().sendMessage(
-//                        new EmbedBuilder()
-//                        .setAuthor(messageCreateEvent.getMessageAuthor())
-//                        .setTitle("Error!")
-//                        .setColor(Color.RED)
-//                        .setDescription("This command is currently not available! Check for updates here: https://github.com/MaFeLP/Birthday-Bot/releases/latest/")
-//                );
-
-                new MessageBuilder()
-                        .setEmbed(
-                                new EmbedBuilder()
-                                .setAuthor(messageCreateEvent.getApi().getYourself())
-                                .setTitle("Confirmation required")
-                                .setColor(new Color(0x1))
-                                .setDescription("Do you really want to reset the list of skribbl words?\n\n" +
-                                        "If so, please react to this message with " + EmojiParser.parseToUnicode(":white_check_mark:") + "\n\n" +
-                                        "If you want to cancel, please react with " + EmojiParser.parseToUnicode((":negative_squared_cross_mark:")) + "\n")
-                        ).send(messageCreateEvent.getChannel()).thenAccept(message -> {
-                            message.addReaction(EmojiParser.parseToUnicode(":white_check_mark:"));
-                            message.addReaction(EmojiParser.parseToUnicode(":negative_squared_cross_mark:"));
-                            message.addReactionAddListener(new SkribblReactionListener());
-                        }).thenAccept(none -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Sent confirmation embed."));
-            }
+            case "reset", "clear" -> new MessageBuilder()
+                    .setEmbed(
+                            new EmbedBuilder()
+                            .setAuthor(messageCreateEvent.getApi().getYourself())
+                            .setTitle("Confirmation required")
+                            .setColor(new Color(0x1))
+                            .setDescription("Do you really want to reset the list of skribbl words?\n\n" +
+                                    "If so, please react to this message with " + EmojiParser.parseToUnicode(":white_check_mark:") + "\n\n" +
+                                    "If you want to cancel, please react with " + EmojiParser.parseToUnicode((":negative_squared_cross_mark:")) + "\n")
+                    ).send(messageCreateEvent.getChannel()).thenAccept(message -> {
+                        message.addReaction(EmojiParser.parseToUnicode(":white_check_mark:"));
+                        message.addReaction(EmojiParser.parseToUnicode(":negative_squared_cross_mark:"));
+                        message.addReactionAddListener(new SkribblReactionListener());
+                    }).thenAccept(none -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Sent confirmation embed."));
             case "help" -> {
                 logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Help message");
 
@@ -145,9 +133,7 @@ public class SkribblCommand extends Thread{
                         .addInlineField("help","Prints this message")
                 ).thenAccept(message -> logger.debug("Help message sent to channel with ID " + message.getChannel().getId()));
             }
-            default -> {
-                logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl\"; Response: Unknown Argument..");
-            }
+            default -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl\"; Response: Unknown Argument..");
         }
     }
 }
