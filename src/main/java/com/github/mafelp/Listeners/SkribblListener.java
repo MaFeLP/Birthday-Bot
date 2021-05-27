@@ -3,7 +3,7 @@ package com.github.mafelp.Listeners;
 import com.github.mafelp.utils.Command;
 import com.github.mafelp.utils.CommandParser;
 import com.github.mafelp.utils.Configuration;
-import com.github.mafelp.utils.SkribblManager;
+import com.github.mafelp.Manager.SkribblManager;
 import com.github.mafelp.utils.exceptions.CommandNotFinishedException;
 import com.github.mafelp.utils.exceptions.NoCommandGivenException;
 import com.vdurmont.emoji.EmojiParser;

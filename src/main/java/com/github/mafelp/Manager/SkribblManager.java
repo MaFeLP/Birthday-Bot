@@ -1,5 +1,6 @@
-package com.github.mafelp.utils;
+package com.github.mafelp.Manager;
 
+import com.github.mafelp.utils.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.server.Server;

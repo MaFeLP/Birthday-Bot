@@ -2,6 +2,7 @@ package com.github.mafelp;
 
 import com.github.mafelp.Listeners.MessageCreateListener;
 import com.github.mafelp.Listeners.SkribblListener;
+import com.github.mafelp.Manager.PresentManager;
 import com.github.mafelp.utils.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,7 @@ import java.util.concurrent.CompletionException;
 
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
-    protected static DiscordApi discordApi;
+    public static DiscordApi discordApi;
 
     public static void main(String[] args) {
         logger.info("Starting Birthday-Bot version 1.4-beta");
@@ -54,5 +55,7 @@ public class Main {
             logger.fatal("Exiting...");
             System.exit(1);
         }
+
+        PresentManager.loadPresents();
     }
 }

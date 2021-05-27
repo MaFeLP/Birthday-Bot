@@ -1,7 +1,7 @@
 package com.github.mafelp.Listeners;
 
 import com.github.mafelp.utils.Configuration;
-import com.github.mafelp.utils.SkribblManager;
+import com.github.mafelp.Manager.SkribblManager;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

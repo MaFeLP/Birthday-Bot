@@ -19,12 +19,12 @@ public class Configuration {
     private static final Map<Server, YamlConfiguration> serverConfigurations = new HashMap<>();
 
     // Normal use
-    public static File globalConfigurationFile = new File("config.yml");
-    public static File configurationFilesFolder = new File("server-configurations");
+    // public static File globalConfigurationFile = new File("config.yml");
+    // public static File configurationFilesFolder = new File("server-configurations");
 
     // Development usage
-    // public static File globalConfigurationFile = new File("data/config.yml");
-    // public static File configurationFilesFolder = new File("data/server-configurations");
+    public static File globalConfigurationFile = new File("data/config.yml");
+    public static File configurationFilesFolder = new File("data/server-configurations");
 
     public static YamlConfiguration load() {
         logger.info("Loading configuration from config.yml...");
