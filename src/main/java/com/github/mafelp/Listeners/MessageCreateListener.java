@@ -211,7 +211,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         } else
 
         if (cmd.getCommand().equalsIgnoreCase(prefix + "unwrap")) {
-            UnwrapCommand unwrapCommand = new UnwrapCommand(messageCreateEvent, cmd, prefix);
+            UnwrapCommand unwrapCommand = new UnwrapCommand(messageCreateEvent);
             unwrapCommand.start();
         } else
 

@@ -63,6 +63,9 @@ public class WrapCommand extends Thread {
 
     @Override
     public void run() {
+        if (this.command == null)
+            return;
+
         logger.debug("Executing command wrap...");
 
         if (command.getStringArgument(0).isEmpty()) {
@@ -143,6 +146,8 @@ public class WrapCommand extends Thread {
                 }
             }
         }
+
+        present.addProperty("author", messageCreateEvent.getMessageAuthor().getId());
 
         logger.debug("Present is in JSON: " + present);
         if (messageCreateEvent.getServer().isPresent()) {

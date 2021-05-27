@@ -8,16 +8,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.List;
 
 public class PresentManager {
     private static final Logger logger = LogManager.getLogger(PresentManager.class);
@@ -60,7 +61,7 @@ public class PresentManager {
         logger.debug("Updated the presents for server " + server.getName() + ": Added present: " + present.toString());
     }
 
-    public static JsonObject getPresent(Server server, User user) {
+    public static List<JsonObject> getPresents(Server server, User user) {
         String receiverTag = user.getMentionTag();
         StringBuilder receiverBuilder = new StringBuilder();
 
@@ -78,15 +79,55 @@ public class PresentManager {
             return null;
         }
 
+        List<JsonObject> out = new ArrayList<>();
         for (JsonElement element : presents) {
             JsonObject jsonObject = element.getAsJsonObject();
 
             if (jsonObject.get("receiver").getAsString().equals(receiverTag)) {
-                return jsonObject;
+                out.add(jsonObject);
             }
         }
 
-        return null;
+        if (out.size() == 0)
+            return null;
+
+        return out;
+    }
+
+    public static EmbedBuilder buildPresent(JsonObject present) {
+        EmbedBuilder embedBuilder = new EmbedBuilder()
+                .setColor(new Color(0xe684b2))
+                .setTitle(present.get("title").getAsString())
+                .setDescription(present.get("content").getAsString())
+                ;
+
+        StringBuilder idBuilder = new StringBuilder();
+
+        for (char c : present.get("author").getAsString().toCharArray()) {
+            if (!(c == '<' || c == '@' || c == '!' || c == '>')) {
+                idBuilder.append(c);
+            }
+        }
+
+        User author = Main.discordApi.getUserById(idBuilder.toString()).join();
+
+        if (author != null) {
+            embedBuilder.setAuthor(author);
+            logger.debug("Adding author to present: " + author.getName());
+        } else {
+            embedBuilder.setAuthor(Main.discordApi.getYourself());
+            logger.warn("Could not get User with ID " + idBuilder + " whilst trying to build a present. Using Bot Instead.");
+            logger.debug("Adding author to present: Bot");
+        }
+
+        if (!present.get("imageURL").getAsString().isEmpty() && !present.get("imageURL").getAsString().isBlank()) {
+            logger.debug("Adding imageURL to present: " + present.get("imageURL").getAsString());
+            embedBuilder.setImage(present.get("imageURL").getAsString());
+        } else {
+            logger.debug("No imageURL found in present. Not adding one.");
+        }
+
+        return embedBuilder;
     }
 
     public static void savePresents() {
