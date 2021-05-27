@@ -16,6 +16,8 @@ members:
 listeningChannels:
 - 1234
 prefix: '!'
+skribbl:
+  addReaction: true
 authorizedAccountIDs:
 - 1234
 apiToken: <YOUR SUPER SECRET API TOKEN GOES HERE>
