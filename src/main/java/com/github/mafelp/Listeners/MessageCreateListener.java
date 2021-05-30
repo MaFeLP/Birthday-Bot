@@ -107,7 +107,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         } else if (messageCreateEvent.getChannel().asGroupChannel().isPresent()) {
             logger.info("Message sent to group channel \"" + messageCreateEvent.getChannel().asGroupChannel().get().getName() + "\" by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         } else if (messageCreateEvent.getChannel().asPrivateChannel().isPresent()) {
-            logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
+            //logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
 
             if (Configuration.config.getBoolean("allowPrivateMessages")){
                 logger.debug("Channel found as private message. Letting it pass.");

@@ -94,30 +94,34 @@ public class PresentManager {
         return out;
     }
 
-    public static EmbedBuilder buildPresent(JsonObject present) {
+    public static EmbedBuilder buildPresent(JsonObject present, User author) {
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(new Color(0xe684b2))
                 .setTitle(present.get("title").getAsString())
                 .setDescription(present.get("content").getAsString())
                 ;
 
-        StringBuilder idBuilder = new StringBuilder();
+        if (author == null) {
+            StringBuilder idBuilder = new StringBuilder();
 
-        for (char c : present.get("author").getAsString().toCharArray()) {
-            if (!(c == '<' || c == '@' || c == '!' || c == '>')) {
-                idBuilder.append(c);
+            for (char c : present.get("author").getAsString().toCharArray()) {
+                if (!(c == '<' || c == '@' || c == '!' || c == '>')) {
+                    idBuilder.append(c);
+                }
             }
-        }
 
-        User author = Main.discordApi.getUserById(idBuilder.toString()).join();
+            author = Main.discordApi.getUserById(idBuilder.toString()).join();
 
-        if (author != null) {
-            embedBuilder.setAuthor(author);
-            logger.debug("Adding author to present: " + author.getName());
+            if (author != null) {
+                embedBuilder.setAuthor(author);
+                logger.debug("Adding author to present: " + author.getName());
+            } else {
+                embedBuilder.setAuthor(Main.discordApi.getYourself());
+                logger.warn("Could not get User with ID " + idBuilder + " whilst trying to build a present. Using Bot Instead.");
+                logger.debug("Adding author to present: Bot");
+            }
         } else {
-            embedBuilder.setAuthor(Main.discordApi.getYourself());
-            logger.warn("Could not get User with ID " + idBuilder + " whilst trying to build a present. Using Bot Instead.");
-            logger.debug("Adding author to present: Bot");
+            embedBuilder.setAuthor(author);
         }
 
         if (!present.get("imageURL").getAsString().isEmpty() && !present.get("imageURL").getAsString().isBlank()) {

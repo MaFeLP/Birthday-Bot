@@ -108,7 +108,7 @@ public class UnwrapCommand extends Thread {
         }
 
         for (JsonObject jsonObject : presents) {
-            messageCreateEvent.getChannel().sendMessage(PresentManager.buildPresent(jsonObject)).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" unpacked present \"" + jsonObject.get("title").getAsString() + "\"."));
+            messageCreateEvent.getChannel().sendMessage(PresentManager.buildPresent(jsonObject,null)).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" unpacked present \"" + jsonObject.get("title").getAsString() + "\"."));
         }
     }
 
