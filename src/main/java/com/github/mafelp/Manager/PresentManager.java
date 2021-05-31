@@ -62,15 +62,6 @@ public class PresentManager {
     }
 
     public static List<JsonObject> getPresents(Server server, User user) {
-        String receiverTag = user.getMentionTag();
-        StringBuilder receiverBuilder = new StringBuilder();
-
-        for (char c : receiverTag.toCharArray()) {
-            if (c != '!')
-                receiverBuilder.append(c);
-        }
-        receiverTag = receiverBuilder.toString();
-
         JsonArray defaultArray = new JsonArray();
 
         JsonArray presents = presentsMap.getOrDefault(server, defaultArray);
@@ -83,7 +74,7 @@ public class PresentManager {
         for (JsonElement element : presents) {
             JsonObject jsonObject = element.getAsJsonObject();
 
-            if (jsonObject.get("receiver").getAsString().equals(receiverTag)) {
+            if (jsonObject.get("receiver").getAsLong() == user.getId()) {
                 out.add(jsonObject);
             }
         }
@@ -101,14 +92,14 @@ public class PresentManager {
                 .setDescription(present.get("content").getAsString())
                 ;
 
-        User author = Main.discordApi.getUserById(present.get("authorID").getAsLong()).join();
+        User author = Main.discordApi.getUserById(present.get("sender").getAsLong()).join();
 
         if (author != null) {
             embedBuilder.setAuthor(author);
             logger.debug("Adding author to present: " + author.getName());
         } else {
             embedBuilder.setAuthor(Main.discordApi.getYourself());
-            logger.warn("Could not get User with ID " + present.get("authorID").getAsLong() + " whilst trying to build a present. Using Bot Instead.");
+            logger.warn("Could not get User with ID " + present.get("sender").getAsLong() + " whilst trying to build a present. Using Bot Instead.");
             logger.debug("Adding author to present: Bot");
         }
 

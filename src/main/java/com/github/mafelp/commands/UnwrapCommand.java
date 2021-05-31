@@ -64,16 +64,6 @@ public class UnwrapCommand extends Thread {
         if (this.command == null)
             return;
 
-        messageCreateEvent.getChannel().sendMessage(
-                new EmbedBuilder()
-                .setAuthor(messageCreateEvent.getMessageAuthor())
-                .setTitle("Error!")
-                .setDescription("No Presents are configured for this birthday!")
-                .setFooter("Upgrade to version 1.4 or higher for present support.")
-        );
-
-        logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Command not available.");
-
         if (command.getStringArgument(0).isEmpty()) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Not enough arguments.");
             return;
@@ -108,6 +98,7 @@ public class UnwrapCommand extends Thread {
         }
 
         for (JsonObject jsonObject : presents) {
+            logger.debug("Current present: " + jsonObject.toString());
             messageCreateEvent.getChannel().sendMessage(PresentManager.buildPresent(jsonObject)).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" unpacked present \"" + jsonObject.get("title").getAsString() + "\"."));
         }
     }

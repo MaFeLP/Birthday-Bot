@@ -44,7 +44,7 @@ public class PresentBuilder {
             try {
                 this.channel = sender.openPrivateChannel().join();
             } catch (CompletionException e) {
-                logger.info("could not open a private chat with user: " + sender.getName());
+                logger.info("Could not open a private chat with user: " + sender.getName());
                 logger.debug("Stack trace: ", e);
                 this.channel = null;
             }
@@ -146,6 +146,7 @@ public class PresentBuilder {
                 PresentManager.addPresent(server, this.present);
                 PrivateChannelListener.setListeningState(this.sender, PrivateListenerState.NONE);
                 presentBuilders.remove(this.sender);
+                PresentManager.savePresents();
             }
         }
 
