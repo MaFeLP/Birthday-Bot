@@ -14,10 +14,12 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.exception.NotFoundException;
 
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.CompletionException;
 
 public class WrapCommand extends Thread {
     private static long threadID = 0;
@@ -73,7 +75,7 @@ public class WrapCommand extends Thread {
 
         if (command.getStringArgument(0).isEmpty()) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"wrap\"; Response: Not enough Arguments");
-            sendHelpEmbed(messageCreateEvent);
+            sendHelpEmbed(true);
             return;
         }
 
@@ -92,7 +94,7 @@ public class WrapCommand extends Thread {
 
         if ("help".equals(command.getStringArgument(0).get().toLowerCase(Locale.ROOT))) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"wrap help\"; Response: Help embed");
-            sendHelpEmbed(messageCreateEvent);
+            sendHelpEmbed(false);
             return;
         }
 
@@ -121,19 +123,18 @@ public class WrapCommand extends Thread {
                 try {
                     User receiver = Main.discordApi.getUserById(receiverID).join();
 
-                    if (receiver == null) {
-                        logger.debug("Wrong receiver");
-                        messageCreateEvent.addReactionsToMessage(EmojiParser.parseToUnicode(":x:"));
-                        return;
-                    }
-
                     PresentBuilder presentBuilder = new PresentBuilder(messageCreateEvent.getMessageAuthor().asUser().get(), receiver, messageCreateEvent.getServerTextChannel().get().getServer(), messageCreateEvent.getMessage());
                     presentBuilder.nextStep(command.getStringArgument(0).get());
                 } catch (NumberFormatException e) {
-                    logger.debug("ID not a long.");
+                    sendReceiverErrorEmbed();
+                    logger.info("User \"" + messageCreateEvent.getMessageAuthor().asUser().get().getName() + "\" executed command \"wrap\"; Response: Number in the argument too long.");
+                } catch (CompletionException e) {
+                    sendReceiverErrorEmbed();
+                    logger.info("User \"" + messageCreateEvent.getMessageAuthor().asUser().get().getName() + "\" executed command \"wrap\"; Response: User with ID not known.");
                 }
             } else {
-                logger.debug("Wrong receiver");
+                sendReceiverErrorEmbed();
+                logger.info("User \"" + messageCreateEvent.getMessageAuthor().asUser().get().getName() + "\" executed command \"wrap\"; Response: No ID given.");
             }
         } else {
             messageCreateEvent.getChannel().sendMessage(
@@ -148,7 +149,7 @@ public class WrapCommand extends Thread {
         }
     }
 
-    private void sendHelpEmbed(MessageCreateEvent messageCreateEvent) {
+    private void sendHelpEmbed(boolean addReaction) {
         messageCreateEvent.getChannel().sendMessage(
                 new EmbedBuilder()
                 .setColor(new Color(0xFFC270))
@@ -158,6 +159,23 @@ public class WrapCommand extends Thread {
                 .addField("Arguments","There is only one argument needed to execute this command. This argument is a ping to the member, who shall receiver this present.")
                 .setFooter("Your command message will be deleted, if possible.")
         ).thenAccept(message -> logger.debug("Help message sent!"));
+
+        if (addReaction)
+            messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":x:"));
+    }
+
+    private void sendReceiverErrorEmbed() {
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(Color.RED)
+                .setAuthor(messageCreateEvent.getMessageAuthor())
+                .setTitle("Error!")
+                .setDescription("You pinged/passed in a non existent user! Please try again!")
+                ;
+        if (command.getStringArgument(0).isPresent())
+            embed.addField("Your Input:", command.getStringArgument(0).get());
+        messageCreateEvent.getChannel().sendMessage(
+                embed
+        ).thenAccept(message -> logger.debug("ReceiverErrorEmbed sent!"));
 
         messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":x:"));
     }
