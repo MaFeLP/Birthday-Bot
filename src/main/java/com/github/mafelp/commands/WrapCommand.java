@@ -115,7 +115,7 @@ public class WrapCommand extends Thread {
                         return;
                     }
 
-                    PresentBuilder presentBuilder = new PresentBuilder(messageCreateEvent.getMessageAuthor().asUser().get(), receiver, messageCreateEvent.getServer().get());
+                    PresentBuilder presentBuilder = new PresentBuilder(messageCreateEvent.getMessageAuthor().asUser().get(), receiver, messageCreateEvent.getServer().get(), messageCreateEvent.getMessage());
                     presentBuilder.nextStep(command.getStringArgument(0).get());
                 } catch (NumberFormatException e) {
                     logger.debug("ID not a long.");
