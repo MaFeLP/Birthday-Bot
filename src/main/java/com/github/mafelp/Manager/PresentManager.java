@@ -94,34 +94,22 @@ public class PresentManager {
         return out;
     }
 
-    public static EmbedBuilder buildPresent(JsonObject present, User author) {
+    public static EmbedBuilder buildPresent(JsonObject present) {
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setColor(new Color(0xe684b2))
                 .setTitle(present.get("title").getAsString())
                 .setDescription(present.get("content").getAsString())
                 ;
 
-        if (author == null) {
-            StringBuilder idBuilder = new StringBuilder();
+        User author = Main.discordApi.getUserById(present.get("authorID").getAsLong()).join();
 
-            for (char c : present.get("author").getAsString().toCharArray()) {
-                if (!(c == '<' || c == '@' || c == '!' || c == '>')) {
-                    idBuilder.append(c);
-                }
-            }
-
-            author = Main.discordApi.getUserById(idBuilder.toString()).join();
-
-            if (author != null) {
-                embedBuilder.setAuthor(author);
-                logger.debug("Adding author to present: " + author.getName());
-            } else {
-                embedBuilder.setAuthor(Main.discordApi.getYourself());
-                logger.warn("Could not get User with ID " + idBuilder + " whilst trying to build a present. Using Bot Instead.");
-                logger.debug("Adding author to present: Bot");
-            }
-        } else {
+        if (author != null) {
             embedBuilder.setAuthor(author);
+            logger.debug("Adding author to present: " + author.getName());
+        } else {
+            embedBuilder.setAuthor(Main.discordApi.getYourself());
+            logger.warn("Could not get User with ID " + present.get("authorID").getAsLong() + " whilst trying to build a present. Using Bot Instead.");
+            logger.debug("Adding author to present: Bot");
         }
 
         if (!present.get("imageURL").getAsString().isEmpty() && !present.get("imageURL").getAsString().isBlank()) {
