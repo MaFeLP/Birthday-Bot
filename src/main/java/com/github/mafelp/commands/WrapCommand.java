@@ -14,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.exception.NotFoundException;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -32,7 +31,7 @@ public class WrapCommand extends Thread {
     public WrapCommand(MessageCreateEvent messageCreateEvent) {
         this.messageCreateEvent = messageCreateEvent;
 
-        Command cmd = null;
+        Command cmd;
         try {
             cmd = CommandParser.parseFromString(messageCreateEvent.getMessageContent());
             logger.debug("Command is: " + cmd.getCommand());
@@ -43,12 +42,10 @@ public class WrapCommand extends Thread {
                 logger.debug("Arguments are: null");
         } catch (NoCommandGivenException e) {
             logger.error("An error occurred while parsing the message contents." + e.getMessage());
-            logger.debug("Stack-Trace of " + e.getMessage() + ":");
-            for (var s : e.getStackTrace())
-                logger.debug("\t" + s.toString());
+            logger.debug("Stack-Trace of " + e.getMessage() + ":", e);
             return;
         } catch (CommandNotFinishedException e) {
-            logger.debug("Exception caught!" ,e);
+            logger.debug("Exception caught!", e);
             logger.debug("Sending help embed.");
 
             messageCreateEvent.getChannel().sendMessage(
@@ -58,6 +55,7 @@ public class WrapCommand extends Thread {
                             .setTitle("Error!")
                             .addField("Command not finished Exception", "Please finish your command with a quotation mark!")
             );
+            return;
         }
 
         this.command = cmd;
