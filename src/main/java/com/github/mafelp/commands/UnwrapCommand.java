@@ -3,6 +3,7 @@ package com.github.mafelp.commands;
 import com.github.mafelp.Manager.PresentManager;
 import com.github.mafelp.utils.Command;
 import com.github.mafelp.utils.CommandParser;
+import com.github.mafelp.utils.Configuration;
 import com.github.mafelp.utils.exceptions.CommandNotFinishedException;
 import com.github.mafelp.utils.exceptions.NoCommandGivenException;
 import com.google.gson.JsonObject;
@@ -65,18 +66,31 @@ public class UnwrapCommand extends Thread {
             return;
 
         if (command.getStringArgument(0).isEmpty()) {
+            sendHelpMessage(true);
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Not enough arguments.");
             return;
         }
+
         String receiverTag = command.getStringArgument(0).get();
         if (!receiverTag.matches("<@([!]?)([0-123456789]*)>")) {
-            sendHelpMessage();
+            sendHelpMessage(true);
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Wrong argument.");
+            return;
+        }
+
+        if (receiverTag.equalsIgnoreCase("help")) {
+            sendHelpMessage(false);
+            logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap help\"; Help page.");
             return;
         }
 
         if (messageCreateEvent.getServer().isEmpty()) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
+                    .setAuthor(messageCreateEvent.getMessageAuthor())
+                    .setColor(Color.RED)
+                    .setTitle("Error!")
+                    .setDescription("Sorry, but this command can only be executed on a server!")
             ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Server is Empty."));
             return;
         }
@@ -84,6 +98,11 @@ public class UnwrapCommand extends Thread {
         if (messageCreateEvent.getMessageAuthor().asUser().isEmpty()) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
+                    .setAuthor(messageCreateEvent.getMessageAuthor())
+                    .setColor(Color.RED)
+                    .setTitle("Error!")
+                    .setDescription("Sorry, but only users can unwrap presents!")
+                    //.setFooter("Use \"" + command.getCommand() + " help\" to get help on this command!")
             ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: User is Empty."));
             return;
         }
@@ -93,6 +112,11 @@ public class UnwrapCommand extends Thread {
         if (presents == null) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
+                    .setColor(new Color(0xff5959))
+                    .setAuthor(messageCreateEvent.getMessageAuthor())
+                    .setTitle("No Presents!")
+                    .setDescription("Sorry, but " + command.getStringArgument(0).get() + " does not have any presents for you!")
+                    .setFooter("Use \"" + Configuration.getServerConfiguration(messageCreateEvent.getServer().get()).getString("prefix") + "wrap help\" to get help on how to wrap a present for a specific user!")
             ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Presents are Empty."));
             return;
         }
@@ -103,9 +127,22 @@ public class UnwrapCommand extends Thread {
         }
     }
 
-    private void sendHelpMessage() {
+    private void sendHelpMessage(boolean beError) {
+        EmbedBuilder embed = new EmbedBuilder()
+                .setColor(new Color(0xFFC270))
+                .setAuthor(messageCreateEvent.getMessageAuthor())
+                .setTitle("Help for command: " + command.getCommand())
+                .setDescription("The unwrap command unwraps a present from another server member, which has been packed before, using the wrap command.")
+                .addField("Arguments","There is only one argument needed to execute this command. This argument is a ping to the member, whose present you wan to unpack.")
+                ;
+
+        if (beError) {
+            embed.setColor(Color.RED)
+                    .setTitle("Wrong usage of command: " + command.getCommand());
+        }
+
         messageCreateEvent.getChannel().sendMessage(
-                new EmbedBuilder()
+                embed
         ).thenAccept(message -> logger.debug("Help message sent!"));
     }
 }
