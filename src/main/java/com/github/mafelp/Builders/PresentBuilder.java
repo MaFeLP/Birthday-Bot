@@ -78,6 +78,22 @@ public class PresentBuilder {
         return this;
     }
 
+    public void sendPreview() {
+        JsonObject previewPresent = present.getAsJsonObject();
+        if (previewPresent.get("title") == null || previewPresent.get("title").getAsString().isEmpty() || previewPresent.get("title").getAsString().isBlank()) {
+            previewPresent.addProperty("title","Placeholder-Title");
+            logger.debug("Adding temporary title to present: " + present.get("title").getAsString());
+        }
+        if (previewPresent.get("content") == null || previewPresent.get("content").getAsString().isEmpty() || previewPresent.get("content").getAsString().isBlank()) {
+            previewPresent.addProperty("content","Placeholder-Content (needs to be configured, before the present can be built!)");
+            logger.debug("Adding content to present: " + present.get("content").getAsString());
+        }
+
+        this.channel.sendMessage(
+                "Here is a preview, of your present: ", PresentManager.buildPresent(previewPresent)
+        ).thenAccept(message -> logger.debug("Sent Preview Message"));
+    }
+
     public PresentBuilder nextStep(String content) {
         if (channel == null) {
             return null;
@@ -158,6 +174,21 @@ public class PresentBuilder {
                 this.message.removeAllReactions().thenAccept(none -> logger.debug("Removed all Reactions from original Present Message."));
                 presentBuilders.remove(this.sender);
                 PresentManager.savePresents(this.server);
+            }
+            case CANCELLED -> {
+                // Cancel routine
+                channel.sendMessage(
+                        new EmbedBuilder()
+                        .setAuthor(this.sender)
+                        .setColor(new Color(0xe7ff7c))
+                        .setTitle("Cancelled!")
+                        .setDescription("You successfully cancelled the PresentBuilding Wizard! You will now be able to create another present or use another wizard!")
+                ).thenAccept(message -> logger.debug("Cancelled Present Building for user" + this.sender.getName()));
+
+                PrivateChannelListener.setListeningState(this.sender, PrivateListenerState.NONE);
+                this.message.removeMessageAttachableListener(this.presentBuilderReactionListener);
+                this.message.removeAllReactions().thenAccept(none -> logger.debug("Removed all Reactions from original Present Message."));
+                presentBuilders.remove(this.sender);
             }
         }
 

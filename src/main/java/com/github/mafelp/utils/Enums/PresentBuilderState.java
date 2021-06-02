@@ -6,4 +6,5 @@ public enum PresentBuilderState{
     CONTENT,
     IMAGE,
     FINISHED,
+    CANCELLED,
 }

@@ -2,6 +2,7 @@ package com.github.mafelp.Listeners;
 
 import com.github.mafelp.Builders.PresentBuilder;
 import com.github.mafelp.utils.Enums.PresentBuilderState;
+import com.google.gson.JsonObject;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,18 +59,21 @@ public class PresentBuilderReactionListener implements ReactionAddListener {
 //            return;
 //        }
 
+        PresentBuilder presentBuilder = PresentBuilder.getPresentBuilder(adder);
+        if (presentBuilder == null) {
+            logger.warn("An error occurred while getting a present builder. I'm not sure why, though...");
+            return;
+        }
+
         if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":white_check_mark:"))) {
             logger.debug("Build reaction...");
-            PresentBuilder presentBuilder = PresentBuilder.getPresentBuilder(adder);
-            if (presentBuilder == null) {
-                logger.warn("An error occurred while getting a present builder. I'm not sure why, though...");
-                return;
-            }
             presentBuilder.setState(PresentBuilderState.FINISHED).nextStep(null);
         } else if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":x:"))) {
             logger.debug("Cancel reaction...");
+            presentBuilder.setState(PresentBuilderState.CANCELLED).nextStep(null);
         } else if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":eye:"))) {
             logger.debug("Preview reaction...");
+            presentBuilder.sendPreview();
         } else {
             logger.debug("Unknown reaction...");
         }
