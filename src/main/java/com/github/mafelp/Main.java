@@ -5,6 +5,7 @@ import com.github.mafelp.Listeners.PrivateChannelListener;
 import com.github.mafelp.Listeners.SkribblListener;
 import com.github.mafelp.Manager.PresentManager;
 import com.github.mafelp.utils.Configuration;
+import com.github.mafelp.utils.ShutdownProcess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -57,6 +58,8 @@ public class Main {
             logger.fatal("Exiting...");
             System.exit(1);
         }
+
+        Runtime.getRuntime().addShutdownHook(new ShutdownProcess());
 
         PresentManager.loadPresents();
     }
