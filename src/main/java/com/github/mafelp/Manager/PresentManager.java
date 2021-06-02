@@ -103,7 +103,7 @@ public class PresentManager {
             logger.debug("Adding author to present: Bot");
         }
 
-        if (!present.get("imageURL").getAsString().isEmpty() && !present.get("imageURL").getAsString().isBlank()) {
+        if (present.get("imageURL") != null && !present.get("imageURL").getAsString().isEmpty() && !present.get("imageURL").getAsString().isBlank()) {
             logger.debug("Adding imageURL to present: " + present.get("imageURL").getAsString());
             embedBuilder.setImage(present.get("imageURL").getAsString());
         } else {

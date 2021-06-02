@@ -1,7 +1,9 @@
 package com.github.mafelp.Builders;
 
+import com.github.mafelp.Listeners.PresentBuilderReactionListener;
 import com.github.mafelp.Listeners.PrivateChannelListener;
 import com.github.mafelp.Manager.PresentManager;
+import com.github.mafelp.utils.Enums.PresentBuilderState;
 import com.github.mafelp.utils.Enums.PrivateListenerState;
 import com.google.gson.JsonObject;
 import com.vdurmont.emoji.EmojiParser;
@@ -24,16 +26,17 @@ public class PresentBuilder {
 
     private static final Map<User, PresentBuilder> presentBuilders = new HashMap<>();
 
-    private BuilderState state;
+    private PresentBuilderState state;
     private final JsonObject present;
     private PrivateChannel channel;
     private final Server server;
     private final User sender;
     private final User receiver;
     private Message message;
+    private final PresentBuilderReactionListener presentBuilderReactionListener = new PresentBuilderReactionListener();
 
     public PresentBuilder(User sender, User receiver, Server server, Message originalMessage) {
-        this.state = BuilderState.START;
+        this.state = PresentBuilderState.START;
         this.sender = sender;
         this.receiver = receiver;
         this.server = server;
@@ -70,6 +73,11 @@ public class PresentBuilder {
         return this.present;
     }
 
+    public PresentBuilder setState(PresentBuilderState builderState) {
+        this.state = builderState;
+        return this;
+    }
+
     public PresentBuilder nextStep(String content) {
         if (channel == null) {
             return null;
@@ -94,9 +102,9 @@ public class PresentBuilder {
                 ).join();
                 message.addReaction(EmojiParser.parseToUnicode(":eye:"));
                 message.addReaction(EmojiParser.parseToUnicode(":x:"));
-                //TODO add Reaction listener.
+                message.addReactionAddListener(this.presentBuilderReactionListener);
                 logger.debug("Started Present Building with a user in a private channel: Sent first Message.");
-                this.state = BuilderState.TITLE;
+                this.state = PresentBuilderState.TITLE;
             }
             case TITLE -> {
                 present.addProperty("title", content);
@@ -108,7 +116,7 @@ public class PresentBuilder {
                         .addField("Set the title to", content)
                         .addField("Step 2", "Please give a description for your present/a small text for the receiver.")
                 ).thenAccept(message -> logger.debug("Added Title to present: " + content));
-                this.state = BuilderState.CONTENT;
+                this.state = PresentBuilderState.CONTENT;
             }
             case CONTENT -> {
                 present.addProperty("content", content);
@@ -122,7 +130,7 @@ public class PresentBuilder {
                         .addField("Step 3", "Please give a direct URL to an Image, which will be displayed on your present.")
                         .setFooter("From now on, you can finish the creation process early, by reaction to the starting message with a green tick.")
                 ).thenAccept(message -> logger.debug("Added content to present: " + content));
-                this.state = BuilderState.IMAGE;
+                this.state = PresentBuilderState.IMAGE;
             }
             case IMAGE -> {
                 present.addProperty("imageURL", content);
@@ -136,15 +144,17 @@ public class PresentBuilder {
                         .setImage(content)
                 ).thenAccept(message -> logger.debug("Added imageURL to present: " + content));
 
-                this.state = BuilderState.FINISHED;
+                this.state = PresentBuilderState.FINISHED;
                 return this.nextStep(content);
             }
             case FINISHED -> {
                 channel.sendMessage("Your finished Present:",
                         PresentManager.buildPresent(this.present)
-                ).thenAccept(message -> logger.debug(""));
+                ).thenAccept(message -> logger.debug("Successfully built the present!"));
                 PresentManager.addPresent(server, this.present);
                 PrivateChannelListener.setListeningState(this.sender, PrivateListenerState.NONE);
+                this.message.removeMessageAttachableListener(this.presentBuilderReactionListener);
+                this.message.removeAllReactions().thenAccept(none -> logger.debug("Removed all Reactions from original Present Message."));
                 presentBuilders.remove(this.sender);
                 PresentManager.savePresents();
             }
@@ -152,12 +162,4 @@ public class PresentBuilder {
 
         return this;
     }
-}
-
-enum BuilderState{
-    START,
-    TITLE,
-    CONTENT,
-    IMAGE,
-    FINISHED,
 }
