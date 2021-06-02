@@ -113,20 +113,25 @@ public class PresentManager {
         return embedBuilder;
     }
 
+    public static void savePresents(Server server ) {
+        File presentsFile = getPresentsFile(server);
+        if (presentsFile == null) {
+            logger.debug("Skipping Server " + server.getName() + "...");
+            return;
+        }
+
+        try {
+            PrintStream printStream = new PrintStream(presentsFile);
+            printStream.println(presentsMap.get(server).toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void savePresents() {
         for (Server server : presentsMap.keySet()) {
-            File presentsFile = getPresentsFile(server);
-            if (presentsFile == null) {
-                logger.debug("Skipping Server " + server.getName() + "...");
-                continue;
-            }
-
-            try {
-                PrintStream printStream = new PrintStream(presentsFile);
-                printStream.println(presentsMap.get(server).toString());
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+            savePresents(server);
         }
     }
 

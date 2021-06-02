@@ -148,6 +148,7 @@ public class PresentBuilder {
                 return this.nextStep(content);
             }
             case FINISHED -> {
+                // Cleanup routine.
                 channel.sendMessage("Your finished Present:",
                         PresentManager.buildPresent(this.present)
                 ).thenAccept(message -> logger.debug("Successfully built the present!"));
@@ -156,7 +157,7 @@ public class PresentBuilder {
                 this.message.removeMessageAttachableListener(this.presentBuilderReactionListener);
                 this.message.removeAllReactions().thenAccept(none -> logger.debug("Removed all Reactions from original Present Message."));
                 presentBuilders.remove(this.sender);
-                PresentManager.savePresents();
+                PresentManager.savePresents(this.server);
             }
         }
 
