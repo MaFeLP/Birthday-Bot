@@ -60,7 +60,12 @@ public class PresentBuilderReactionListener implements ReactionAddListener {
 
         if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":white_check_mark:"))) {
             logger.debug("Build reaction...");
-            PresentBuilder.getPresentBuilder(adder).setState(PresentBuilderState.FINISHED).nextStep(null);
+            PresentBuilder presentBuilder = PresentBuilder.getPresentBuilder(adder);
+            if (presentBuilder == null) {
+                logger.warn("An error occurred while getting a present builder. I'm not sure why, though...");
+                return;
+            }
+            presentBuilder.setState(PresentBuilderState.FINISHED).nextStep(null);
         } else if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":x:"))) {
             logger.debug("Cancel reaction...");
         } else if (reactionAddEvent.getEmoji().equalsEmoji(EmojiParser.parseToUnicode(":eye:"))) {
