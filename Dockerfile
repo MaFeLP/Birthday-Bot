@@ -18,7 +18,7 @@ RUN rm /tmp/build/src/main/resources/log4j2-test.xml
 RUN mvn clean verify
 
 # Copy the built bot to /usr/bin/
-RUN mv /tmp/build/target/Birthday-Bot-1.4.jar /usr/bin/Birthday-Bot.jar
+RUN mv /tmp/build/target/Birthday-Bot-1.5.jar /usr/bin/Birthday-Bot.jar
 
 # Clean up the build and source files
 RUN rm -rf /tmp/build/ ${HOME}/.m2/
