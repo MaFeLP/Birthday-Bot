@@ -218,7 +218,13 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         if (cmd.getCommand().equalsIgnoreCase(prefix + "skribbl")) {
             SkribblCommand skribblCommand = new SkribblCommand(messageCreateEvent, cmd);
             skribblCommand.start();
+        } else
+
+        if (cmd.getCommand().equalsIgnoreCase(prefix + "birthday")) {
+            BirthdayCommand birthdayCommand = new BirthdayCommand(cmd, messageCreateEvent);
+            birthdayCommand.start();
         }
+
 
         // Removes name changes from this thread.
         Thread.currentThread().setName(currentThreadName);

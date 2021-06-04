@@ -2,7 +2,6 @@ package com.github.mafelp.Listeners;
 
 import com.github.mafelp.Builders.PresentBuilder;
 import com.github.mafelp.utils.Enums.PresentBuilderState;
-import com.google.gson.JsonObject;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,20 +43,6 @@ public class PresentBuilderReactionListener implements ReactionAddListener {
         }
 
         logger.debug("Reaction to message(id=" + reactionAddEvent.getMessage().get().getId() + "): " + reactionAddEvent.getEmoji());
-
-//        boolean isListeningMessage = false;
-//        for (Message message : listeningMessages) {
-//            if (message.equals(reactionAddEvent.getMessage().get())) {
-//                isListeningMessage = true;
-//                logger.debug("Found message in listening Messages!");
-//                break;
-//            }
-//        }
-//
-//        if (!isListeningMessage) {
-//            logger.debug("Message is not in the list of listening messages. Ignoring...");
-//            return;
-//        }
 
         PresentBuilder presentBuilder = PresentBuilder.getPresentBuilder(adder);
         if (presentBuilder == null) {
