@@ -21,24 +21,15 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Starting Birthday-Bot version 1.4-beta");
 
-        logger.info("loading configuration...");
+        preStartup();
+        logIn();
+        postStartup();
 
-        Configuration.load();
+        logger.debug("Adding shutdown hook.");
+        Runtime.getRuntime().addShutdownHook(new ShutdownProcess(false));
+    }
 
-        if (!Configuration.globalConfigurationFile.exists())
-            Configuration.save();
-
-        logger.debug("Current configuration is: \n" + Configuration.config.saveToString());
-
-        if (Configuration.config.get("apiToken") == null || Objects.equals(Configuration.config.get("apiToken"), "<Your Token goes here>")) {
-            logger.fatal("No API Token configured!");
-            logger.fatal("Please head to the config.yml file and set the value for \"apiToken:\" to your api token!");
-            logger.info("The api token can be found here: https://discord.com/developers/applications/ !");
-            logger.fatal("Exiting...");
-            System.exit(1);
-
-        }
-
+    public static void logIn() {
         logger.info("Starting bot instance...");
         logger.info("Using api token: " + Configuration.config.getString("apiToken"));
         try {
@@ -58,9 +49,39 @@ public class Main {
             logger.fatal("Exiting...");
             System.exit(1);
         }
+    }
 
-        Runtime.getRuntime().addShutdownHook(new ShutdownProcess());
+    public static void preStartup() {
+        String oldName = Thread.currentThread().getName();
+        Thread.currentThread().setName("PreStartup-Worker");
 
+        logger.info("Loading global configuration...");
+        Configuration.loadGlobalConfiguration();
+        logger.debug("Current configuration is: \n" + Configuration.config.saveToString());
+        logger.info("Global configuration loaded!");
+
+        if (Configuration.config.get("apiToken") == null || Objects.equals(Configuration.config.get("apiToken"), "<Your Token goes here>")) {
+            logger.fatal("No API Token configured!");
+            logger.fatal("Please head to the config.yml file and set the value for \"apiToken:\" to your api token!");
+            logger.info("The api token can be found here: https://discord.com/developers/applications/ !");
+            logger.fatal("Exiting...");
+            System.exit(1);
+        }
+
+        Thread.currentThread().setName(oldName);
+    }
+
+    public static void postStartup() {
+        String oldName = Thread.currentThread().getName();
+        Thread.currentThread().setName("PostStartup-Worker");
+
+        logger.info("Loading Server configurations...");
+        Configuration.loadAll();
+        logger.info("Loaded all Server configurations!");
+
+        logger.info("Loading all presents...");
         PresentManager.loadPresents();
+
+        Thread.currentThread().setName(oldName);
     }
 }
