@@ -96,4 +96,28 @@ public class Command {
 
         return index < arguments.length;
     }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Command))
+            return false;
+
+        Command cmd = (Command) obj;
+
+        if (!command.equals(cmd.command))
+            return false;
+
+        if (arguments.length != cmd.arguments.length)
+            return false;
+
+        int i = 0;
+        for (String argument : arguments) {
+            if (!argument.equals(cmd.arguments[i]))
+                return false;
+            ++i;
+        }
+
+        return true;
+    }
 }
