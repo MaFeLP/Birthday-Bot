@@ -96,7 +96,7 @@ public class SkribblManager {
         }
     }
 
-    public static List<String> removeSkribblWord(Server server, String word) {
+    public static boolean removeSkribblWord(Server server, String word) {
         List<String> words = getSkribblWords(server);
 
         if (!(word.endsWith(",")))
@@ -119,7 +119,7 @@ public class SkribblManager {
         if (listChanged) {
             skribblWordMap.replace(server, words);
         }
-        return skribblWordMap.get(server);
+        return listChanged;
     }
 
     public static void resetSkribblWords(Server server) {

@@ -128,6 +128,8 @@ public class SkribblReactionListener implements ReactionAddListener {
             return;
         }
 
+        reactionAddEvent.getApi().removeListener(this);
+
         reactionAddEvent.removeAllReactionsFromMessage().thenAccept(none -> logger.debug("Removed all reactions from message."));
     }
 }

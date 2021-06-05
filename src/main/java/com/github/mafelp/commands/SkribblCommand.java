@@ -5,6 +5,7 @@ import com.github.mafelp.Listeners.SkribblReactionListener;
 import com.github.mafelp.utils.Command;
 import com.github.mafelp.utils.Configuration;
 import com.github.mafelp.Manager.SkribblManager;
+import com.github.mafelp.utils.PermissionValidate;
 import com.vdurmont.emoji.EmojiParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,8 @@ import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.awt.*;
 import java.io.File;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class SkribblCommand extends Thread{
@@ -117,11 +120,125 @@ public class SkribblCommand extends Thread{
                         message.addReaction(EmojiParser.parseToUnicode(":negative_squared_cross_mark:"));
                         message.addReactionAddListener(new SkribblReactionListener());
                     }).thenAccept(none -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Sent confirmation embed."));
+            case "remove" -> {
+                if (!PermissionValidate.authorised(messageCreateEvent.getServerTextChannel().get().getServer(), messageCreateEvent.getMessageAuthor())) {
+                    messageCreateEvent.getChannel().sendMessage(
+                            new EmbedBuilder()
+                            .setAuthor(messageCreateEvent.getMessageAuthor())
+                            .setColor(Color.RED)
+                            .setTitle("Permission denied!")
+                            .setDescription("Sorry, you do not have the required permission to execute this command!")
+                    ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl remove\"; Response: not authorised."));
+                    messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":no_entry:"));
+                    return;
+                }
+
+                boolean isFirstArgument = true;
+                if (command.getStringArgument(1).isEmpty()) {
+                    messageCreateEvent.getChannel().sendMessage(
+                            new EmbedBuilder()
+                            .setAuthor(messageCreateEvent.getMessageAuthor())
+                            .setColor(Color.RED)
+                            .setTitle("Error!")
+                            .setDescription("You need to provide at least one more argument to this command, so we can remove this word from the list!")
+                    ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Sent confirmation embed."));
+                    return;
+                }
+                int removedWords = 0;
+
+                List<String> notRemovedWords = new ArrayList<>();
+                List<String> removedWordlist = new ArrayList<>();
+
+                for (String word : command.getArguments()) {
+                    if (isFirstArgument) {
+                        isFirstArgument = false;
+                        continue;
+                    }
+
+                    if (SkribblManager.removeSkribblWord(messageCreateEvent.getServerTextChannel().get().getServer(), word)) {
+                        ++removedWords;
+                        removedWordlist.add(word);
+                    } else {
+                        notRemovedWords.add(word);
+                    }
+                    logger.debug("Removed Skribbl word " + word + " from server " + messageCreateEvent.getServerTextChannel().get().getServer().getName() + "!");
+                }
+
+                logger.debug("Not removed words: " + notRemovedWords);
+                logger.debug("Removed words: " + removedWordlist);
+
+                if (removedWords == 0) {
+                    messageCreateEvent.getChannel().sendMessage(
+                            new EmbedBuilder()
+                    ).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"" + command.getCommand() + " remove\"; Response: No words removed."));
+                    messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":x:"));
+                    return;
+                }
+
+                messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":white_check_mark:"));
+
+                switch (removedWords) {
+                    case 1 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":one:"));
+                    case 2 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":two:"));
+                    case 3 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":three:"));
+                    case 4 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":four:"));
+                    case 5 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":five:"));
+                    case 6 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":six:"));
+                    case 7 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":seven:"));
+                    case 8 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":eight:"));
+                    case 9 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":nine:"));
+                    case 10 -> messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":ten:"));
+                }
+
+                SkribblManager.saveSkribblWords(messageCreateEvent.getServerTextChannel().get().getServer());
+
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setAuthor(messageCreateEvent.getApi().getYourself())
+                        .setColor(Color.GREEN)
+                        .setTitle("Success!")
+                        .setDescription("Successfully removed " + removedWords + " words from the skribbl word list!")
+                        .setFooter("Use \"" + command.getCommand() + " get\" to get the current list of skribbl words.")
+                        ;
+
+                if (!removedWordlist.isEmpty()) {
+                    StringBuilder words = new StringBuilder();
+                    for (int i = 0; i < removedWordlist.size(); ++i) {
+                        words.append(removedWordlist.get(i));
+                        if (i != removedWordlist.size() -1) {
+                            words.append(',');
+                            words.append(' ');
+                        }
+                    }
+                    embed.addField("Removed words:", words.toString());
+                }
+                if (!notRemovedWords.isEmpty()) {
+                    StringBuilder words = new StringBuilder();
+                    for (int i = 0; i < notRemovedWords.size(); ++i) {
+                        words.append(notRemovedWords.get(i));
+                        if (i != notRemovedWords.size() -1) {
+                            words.append(',');
+                            words.append(' ');
+                        }
+                    }
+                    embed.addField("Not removed words:", words.toString());
+                }
+
+                messageCreateEvent.getChannel().sendMessage(embed).thenAccept(message -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"" + command.getCommand() + " remove\"; Response: No words removed."));
+            }
             case "help" -> {
                 logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl help\"; Response: Help message");
+                sendHelpMessage();
+            }
+            default -> {
+                logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl\"; Response: Unknown Argument..");
+                sendHelpMessage();
+            }
+        }
+    }
 
-                messageCreateEvent.getChannel().sendMessage(
-                        new EmbedBuilder()
+    private void sendHelpMessage() {
+        messageCreateEvent.getChannel().sendMessage(
+                new EmbedBuilder()
                         .setTitle("Help message")
                         .setAuthor(messageCreateEvent.getApi().getYourself())
                         .setColor(new Color(0xFFB500))
@@ -131,9 +248,6 @@ public class SkribblCommand extends Thread{
                         .addInlineField("get", "Outputs the list of words.")
                         .addInlineField("reset/clear", "Clears the list of words, currently in the skribbl List.")
                         .addInlineField("help","Prints this message")
-                ).thenAccept(message -> logger.debug("Help message sent to channel with ID " + message.getChannel().getId()));
-            }
-            default -> logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl\"; Response: Unknown Argument..");
-        }
+        ).thenAccept(message -> logger.debug("Help message sent to channel with ID " + message.getChannel().getId()));
     }
 }
