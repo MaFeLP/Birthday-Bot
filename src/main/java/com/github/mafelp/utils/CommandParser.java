@@ -84,9 +84,9 @@ public class CommandParser {
      * @param inputCommandArray the array to parse the commands from
      * @return the built command
      */
-    public static Command parseFromArray(String[] inputCommandArray) {
+    public static Command parseFromArray(String[] inputCommandArray) throws NoCommandGivenException{
         if (inputCommandArray == null)
-            return new Command(null, null);
+            throw new NoCommandGivenException("No command was given!");
 
         if (inputCommandArray.length == 1)
             return new Command(inputCommandArray[0], null);
