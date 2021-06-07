@@ -103,6 +103,9 @@ public class Command {
         if (arguments == null)
             return false;
 
+        if (index < 0)
+            return false;
+
         return index < arguments.length;
     }
 
@@ -154,6 +157,5 @@ public class Command {
         }
 
         return out.toString();
-
     }
 }
