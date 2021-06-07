@@ -132,19 +132,28 @@ public class Command {
 
     @Override
     public String toString() {
+        return this.toString(false);
+    }
+
+    public String toString(boolean withQuotes) {
         StringBuilder out = new StringBuilder();
 
-        out.append('"');
+        if (withQuotes)
+            out.append('"');
         out.append(this.command);
-        out.append('"');
+        if (withQuotes)
+            out.append('"');
 
         for (String s: this.arguments) {
             out.append(' ');
-            out.append('"');
+            if (withQuotes)
+                out.append('"');
             out.append(s);
-            out.append('"');
+            if (withQuotes)
+                out.append('"');
         }
 
         return out.toString();
+
     }
 }
