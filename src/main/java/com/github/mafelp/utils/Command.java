@@ -1,15 +1,6 @@
 package com.github.mafelp.utils;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.invoke.MethodHandles;
-import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Class to parse strings to commands.
