@@ -1,6 +1,5 @@
 package com.github.mafelp.utils;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -68,19 +67,63 @@ class CommandTest {
         ++runthrough;
     }
 
-    @Test
-    void getLongArgument() {
+    @ParameterizedTest
+    @MethodSource("argumentMaker")
+    void getLongArgument(Command command) {
+        assertTrue(command.getLongArgument(0).isPresent());
+        assertInstanceOf(Long.class, command.getLongArgument(0).get());
+        assertFalse(command.getLongArgument(1).isPresent());
+        assertFalse(command.getLongArgument(2).isPresent());
+
+        switch (runthrough) {
+            case 0 -> assertEquals(command.getLongArgument(0).get(), 1234);
+            case 1 -> {
+                assertEquals(command.getLongArgument(0).get(), 18237349);
+
+                runthrough = -1;
+            }
+        }
+
+        ++runthrough;
     }
 
-    @Test
-    void testEquals() {
+    @ParameterizedTest
+    @MethodSource("argumentMaker")
+    void testEquals(Command command) {
+        assertEquals(command, command);
     }
 
-    @Test
-    void testToString() {
+    @ParameterizedTest
+    @MethodSource("argumentMaker")
+    void testToString(Command command) {
+        switch (runthrough) {
+            case 0 -> assertEquals(command.toString(), "Hallo 1234 true geht?");
+            case 1 -> {
+                assertEquals(command.toString(), "test 18237349 false !@#$^&?");
+
+                runthrough = -1;
+            }
+        }
+
+        ++runthrough;
     }
 
-    @Test
-    void testToStringWithQuotationMarks() {
+    @ParameterizedTest
+    @MethodSource("argumentMaker")
+    void testToStringWithQuotationMarks(Command command) {
+        switch (runthrough) {
+            case 0 -> {
+                assertEquals(command.toString(true), "\"Hallo\" \"1234\" \"true\" \"geht?\"");
+                assertEquals(command.toString(false), "Hallo 1234 true geht?");
+            }
+            case 1 -> {
+                assertEquals(command.toString(true), "\"test\" \"18237349\" \"false\" \"!@#$^&?\"");
+                assertEquals(command.toString(false), "test 18237349 false !@#$^&?");
+
+                runthrough = -1;
+            }
+        }
+
+        ++runthrough;
     }
 }
