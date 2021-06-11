@@ -21,13 +21,30 @@ import java.util.Locale;
 import java.util.concurrent.CompletionException;
 
 public class WrapCommand extends Thread {
+    /**
+     * The logger which is used to log statements to the console.
+     */
+    private static final Logger logger = LogManager.getLogger(ConfigCommand.class);
+
+    /**
+     * The number of threads of this kind that were being created.
+     */
     private static long threadID = 0;
 
+    /**
+     * The Event that is being passed to this class by the discord API.
+     */
     private final MessageCreateEvent messageCreateEvent;
+
+    /**
+     * The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     */
     private Command command;
 
-    private static final Logger logger = LogManager.getLogger(WrapCommand.class);
-
+    /**
+     * The "Default" Constructor
+     * @param messageCreateEvent The Event that is being passed to this class by the discord API.
+     */
     public WrapCommand(MessageCreateEvent messageCreateEvent) {
         this.messageCreateEvent = messageCreateEvent;
 
@@ -64,6 +81,9 @@ public class WrapCommand extends Thread {
         ++threadID;
     }
 
+    /**
+     * The method handles the actual execution of this command.
+     */
     @Override
     public void run() {
         if (this.command == null)
@@ -71,12 +91,14 @@ public class WrapCommand extends Thread {
 
         logger.debug("Executing command wrap...");
 
+        // Send the help embed on wrong usage.
         if (command.getStringArgument(0).isEmpty()) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"wrap\"; Response: Not enough Arguments");
             sendHelpEmbed(true);
             return;
         }
 
+        // Sends an error Embed, if the message was not sent on a server.
         if (messageCreateEvent.getServerTextChannel().isEmpty()) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
@@ -90,12 +112,14 @@ public class WrapCommand extends Thread {
             return;
         }
 
+        // If the argument is help, send a help embed.
         if ("help".equals(command.getStringArgument(0).get().toLowerCase(Locale.ROOT))) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"wrap help\"; Response: Help embed");
             sendHelpEmbed(false);
             return;
         }
 
+        // If the executor of the command is not a user, send an error.
         if (messageCreateEvent.getMessageAuthor().asUser().isEmpty()) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
@@ -109,8 +133,10 @@ public class WrapCommand extends Thread {
             return;
         }
 
+        // Check if the user has no current wizard running.
         if (PrivateChannelListener.getListeningState(messageCreateEvent.getMessageAuthor().asUser().get()) == PrivateListenerState.NONE) {
             if (command.getStringArgument(0).get().matches("<@([!]?)([0-123456789]*)>")) {
+                // Pass the 1st argument into a discord id.
                 StringBuilder builder = new StringBuilder();
                 for (char c : command.getStringArgument(0).get().toCharArray()) {
                     if (c != '<' && c != '@' && c != '!' && c != '>')
@@ -118,6 +144,7 @@ public class WrapCommand extends Thread {
                 }
                 String receiverID = builder.toString();
 
+                // Try to create a PresentBuilder, catch errors and send embeds.
                 try {
                     User receiver = Main.discordApi.getUserById(receiverID).join();
 
@@ -134,6 +161,7 @@ public class WrapCommand extends Thread {
                 sendReceiverErrorEmbed();
                 logger.info("User \"" + messageCreateEvent.getMessageAuthor().asUser().get().getName() + "\" executed command \"wrap\"; Response: No ID given.");
             }
+        // If the user HAS a wizard running, exit and send an embed.
         } else {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
@@ -147,6 +175,9 @@ public class WrapCommand extends Thread {
         }
     }
 
+    /**
+     * @param addReaction If a negative Reaction should be added to the original message.
+     */
     private void sendHelpEmbed(boolean addReaction) {
         messageCreateEvent.getChannel().sendMessage(
                 new EmbedBuilder()
@@ -162,6 +193,10 @@ public class WrapCommand extends Thread {
             messageCreateEvent.getMessage().addReaction(EmojiParser.parseToUnicode(":x:"));
     }
 
+    /**
+     * Sends a receiver error embed, which says, that no user was found with this id, or that the argument passed
+     * in is not a valid id.
+     */
     private void sendReceiverErrorEmbed() {
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(Color.RED)
