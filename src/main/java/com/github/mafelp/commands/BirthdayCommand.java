@@ -30,12 +30,20 @@ public class BirthdayCommand extends Thread {
     private final Command command;
 
     /**
+     * The number of threads of this kind that were being created.
+     */
+    private static long threadID = 0;
+
+    /**
      * @param command The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
      * @param messageCreateEvent The Event that is being passed to this class by the discord API.
      */
     public BirthdayCommand(Command command, MessageCreateEvent messageCreateEvent) {
         this.messageCreateEvent = messageCreateEvent;
         this.command = command;
+
+        this.setName("ConfigCommand-" + threadID);
+        ++threadID;
     }
 
     /**
