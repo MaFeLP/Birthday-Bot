@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Tha class that handles the asynchronous execution of the game command.
+ * The class that handles the asynchronous execution of the game command.
  */
 public class GameCommand extends Thread {
     /**
