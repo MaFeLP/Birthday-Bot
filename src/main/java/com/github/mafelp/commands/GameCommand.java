@@ -9,15 +9,40 @@ import java.awt.*;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Tha class that handles the asynchronous execution of the game command.
+ */
 public class GameCommand extends Thread {
+    /**
+     * The number of threads of this kind that were being created.
+     */
     private static long threadID = 0;
 
+    /**
+     * The Event that is being passed to this class by the discord API.
+     */
     private final MessageCreateEvent messageCreateEvent;
+
+    /**
+     * The list of games, specified in the configuration of the server, on which the message was sent on.
+     */
     private final List<String> games;
 
+    /**
+     * The instance to select a random game.
+     */
     private static final Random random = new Random();
+
+    /**
+     * The logger which is used to log statements to the console.
+     */
     private static final Logger logger = LogManager.getLogger(GameCommand.class);
 
+    /**
+     * The "Default" Constructor
+     * @param messageCreateEvent The Event that is being passed to this class by the discord API.
+     * @param games The list of games specified in the configuration of the server, on which the message was sent.
+     */
     public GameCommand(MessageCreateEvent messageCreateEvent, List<String> games) {
         this.messageCreateEvent = messageCreateEvent;
         this.games = games;
@@ -26,6 +51,9 @@ public class GameCommand extends Thread {
         ++threadID;
     }
 
+    /**
+     * The method handles the actual execution of this command.
+     */
     @Override
     public void run() {
         logger.debug("Executing command game...");
