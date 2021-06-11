@@ -11,23 +11,42 @@ import java.awt.*;
 import java.util.Random;
 
 public class RandomCommand extends Thread {
+    /**
+     * The number of threads of this kind that were being created.
+     */
     private static long threadID = 0;
+
+    /**
+     * The Event that is being passed to this class by the discord API.
+     */
     private final MessageCreateEvent messageCreateEvent;
-    private final String prefix;
+
+    /**
+     * The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     */
     private final Command command;
 
+    /**
+     * The instance to select a random game.
+     */
     private static final Random random = new Random();
-    private static final Logger logger = LogManager.getLogger(RandomCommand.class);
 
-    public RandomCommand(MessageCreateEvent messageCreateEvent, Command command, String prefix) {
+    /**
+     * The logger which is used to log statements to the console.
+     */
+    private static final Logger logger = LogManager.getLogger(GameCommand.class);
+
+    public RandomCommand(MessageCreateEvent messageCreateEvent, Command command) {
         this.messageCreateEvent = messageCreateEvent;
-        this.prefix = prefix;
         this.command = command;
 
         this.setName("RandomCommand-" + threadID);
         ++threadID;
     }
 
+    /**
+     * The method handles the actual execution of this command.
+     */
     @Override
     public void run() {
         logger.debug("Executing command random...");
@@ -37,7 +56,7 @@ public class RandomCommand extends Thread {
             new MessageBuilder().setEmbed(
                     new EmbedBuilder()
                             .setTitle("Error!")
-                            .addField("Not enough arguments!", "Usage: " + prefix + "random <value1> <value2> [<value 3> ...]")
+                            .addField("Not enough arguments!", "Usage: " + command.getCommand() + " <value1> <value2> [<value 3> ...]")
                             .setColor(Color.RED)
             ).send(messageCreateEvent.getChannel());
             logger.debug("Help embed sent.");

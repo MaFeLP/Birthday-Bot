@@ -196,7 +196,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         } else
 
         if (cmd.getCommand().equalsIgnoreCase(prefix + "random")) {
-            RandomCommand randomCommand = new RandomCommand(messageCreateEvent, cmd, prefix);
+            RandomCommand randomCommand = new RandomCommand(messageCreateEvent, cmd);
             randomCommand.start();
         } else
 
