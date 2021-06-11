@@ -17,16 +17,46 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * The class that handles asynchronous execution of the Birthday command.
+ */
 public class ConfigCommand extends Thread {
+    /**
+     * The logger which is used to log statements to the console.
+     */
     private static final Logger logger = LogManager.getLogger(ConfigCommand.class);
 
+    /**
+     * The number of threads of this kind that were being created.
+     */
     private static long threadID = 0;
+
+    /**
+     * The Event that is being passed to this class by the discord API.
+     */
     private final MessageCreateEvent messageCreateEvent;
-    private final String prefix;
+
+    /**
+     * The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     */
     private final Command command;
 
+    /**
+     * The prefix of the message that indicates if the current message is a command.
+     */
+    private final String prefix;
+
+    /**
+     * The server this command is executed on.
+     */
     private final Server server;
 
+    /**
+     * Default Constructor.
+     * @param command The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     * @param messageCreateEvent The Event that is being passed to this class by the discord API.
+     * @param prefix The server this command is executed on.
+     */
     public ConfigCommand(MessageCreateEvent messageCreateEvent, Command command, String prefix) {
         this.messageCreateEvent = messageCreateEvent;
         this.prefix = prefix;
@@ -42,6 +72,9 @@ public class ConfigCommand extends Thread {
         ++threadID;
     }
 
+    /**
+     * The method handles the actual execution of this command.
+     */
     @Override
     public void run() {
         // Check if message was sent on a Server
@@ -76,6 +109,7 @@ public class ConfigCommand extends Thread {
                 authorized = true;
             }
         }
+        // If the user is not authorised, exit and send the permission denied embed.
         if (!authorized) {
             logger.warn("User " + messageCreateEvent.getMessageAuthor().getName() + "(" + messageCreateEvent.getMessageAuthor().getId() + ")" + " tried to execute the config command!");
             logger.debug("Sending error reply...");
