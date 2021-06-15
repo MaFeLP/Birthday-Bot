@@ -20,6 +20,9 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.CompletionException;
 
+/**
+ * The class that handles asynchronous execution of the Unwrap command.
+ */
 public class WrapCommand extends Thread {
     /**
      * The logger which is used to log statements to the console.
@@ -48,6 +51,7 @@ public class WrapCommand extends Thread {
     public WrapCommand(MessageCreateEvent messageCreateEvent) {
         this.messageCreateEvent = messageCreateEvent;
 
+	// Initialises the command with the message content, not the <b>readable</b> message contents.
         Command cmd;
         try {
             cmd = CommandParser.parseFromString(messageCreateEvent.getMessageContent());
@@ -176,6 +180,7 @@ public class WrapCommand extends Thread {
     }
 
     /**
+     * Sends the help embed to the channel in which the original message was sent to.
      * @param addReaction If a negative Reaction should be added to the original message.
      */
     private void sendHelpEmbed(boolean addReaction) {
