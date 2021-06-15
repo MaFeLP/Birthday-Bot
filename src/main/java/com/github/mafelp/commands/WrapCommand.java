@@ -135,7 +135,7 @@ public class WrapCommand extends Thread {
 
         // Check if the user has no current wizard running.
         if (PrivateChannelListener.getListeningState(messageCreateEvent.getMessageAuthor().asUser().get()) == PrivateListenerState.NONE) {
-            if (command.getStringArgument(0).get().matches("<@([!]?)([0-123456789]*)>")) {
+            if (command.getStringArgument(0).get().matches("<@([!]?)[1-9]{1}[0-9]{16,18}>")) {
                 // Pass the 1st argument into a discord id.
                 StringBuilder builder = new StringBuilder();
                 for (char c : command.getStringArgument(0).get().toCharArray()) {
