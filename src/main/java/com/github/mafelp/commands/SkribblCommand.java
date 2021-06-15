@@ -19,14 +19,35 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Locale;
 
+/**
+ * The class that handles asynchronous execution of the Skribbl command.
+ */
 public class SkribblCommand extends Thread{
-    private static long threadID = 0;
-
-    private final MessageCreateEvent messageCreateEvent;
-    private final Command command;
-
+    /**
+     * The logger which is used to log statements to the console.
+     */
     private static final Logger logger = LogManager.getLogger(SkribblCommand.class);
 
+    /**
+     * The number of threads of this kind that were being created.
+     */
+    private static long threadID = 0;
+
+    /**
+     * The Event that is being passed to this class by the discord API.
+     */
+    private final MessageCreateEvent messageCreateEvent;
+
+    /**
+     * The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     */
+    private final Command command;
+
+    /**
+     * Default Constructor sets thread names for this thread.
+     * @param messageCreateEvent The Event that is being passed to this class by the discord API.
+     * @param command The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
+     */
     public SkribblCommand(MessageCreateEvent messageCreateEvent, Command command) {
         this.messageCreateEvent = messageCreateEvent;
         this.command = command;
@@ -35,21 +56,27 @@ public class SkribblCommand extends Thread{
         ++threadID;
     }
 
+    /**
+     * The method handles the actual execution of this command.
+     */
     @Override
     public void run() {
         logger.debug("Executing command skribbl...");
 
+	// Check if the command has an argument.
         if (command.getStringArgument(0).isEmpty()) {
             logger.debug("Not enough arguments.");
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"game\"; Response: Not enough Arguments");
             return;
         }
 
+	// Check if the command was executed on a server.
         if (messageCreateEvent.getServerTextChannel().isEmpty()) {
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"skribbl\"; Response: not a ServerTextChannel.");
             return;
         }
 
+	// Execute different things based on the first argument.
         switch (command.getStringArgument(0).get().toLowerCase(Locale.ROOT)) {
             case "start" -> {
                 SkribblListener.addListeningChannel(messageCreateEvent.getServerTextChannel().get());
