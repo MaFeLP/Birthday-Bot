@@ -263,6 +263,9 @@ public class SkribblCommand extends Thread{
         }
     }
 
+    /**
+     * The method that sends the help message to the channel in which the command was executed.
+     */
     private void sendHelpMessage() {
         messageCreateEvent.getChannel().sendMessage(
                 new EmbedBuilder()

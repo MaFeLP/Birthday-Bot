@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
+/**
+ * The class that tasks that have to do something with the skribbl words.
+ */
 public class SkribblManager {
     /**
      * The logging instance to log statements to the console and the log file.

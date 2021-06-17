@@ -10,6 +10,9 @@ public class Command {
      * The arguments of the command as an argument
      */
     private final String[] arguments;
+    /**
+     * The command aka. the 0th argument passed in.
+     */
     private final String command;
 
     /**
@@ -124,11 +127,18 @@ public class Command {
         return true;
     }
 
+    /**
+     * @return The command as a string without quotes.
+     */
     @Override
     public String toString() {
         return this.toString(false);
     }
 
+    /**
+     * @param withQuotes If the arguments should be put into quotes.
+     * @return The command as a string with(-out) quotes.
+     */
     public String toString(boolean withQuotes) {
         StringBuilder out = new StringBuilder();
 

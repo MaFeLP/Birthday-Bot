@@ -10,6 +10,9 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * The class the handles execution of the random command.
+ */
 public class RandomCommand extends Thread {
     /**
      * The number of threads of this kind that were being created.
@@ -36,6 +39,11 @@ public class RandomCommand extends Thread {
      */
     private static final Logger logger = LogManager.getLogger(GameCommand.class);
 
+    /**
+     * The constructor that initialises the command execution.
+     * @param messageCreateEvent The event passed in by the bot, which contains useful information about the message.
+     * @param command The command that was parsed.
+     */
     public RandomCommand(MessageCreateEvent messageCreateEvent, Command command) {
         this.messageCreateEvent = messageCreateEvent;
         this.command = command;
