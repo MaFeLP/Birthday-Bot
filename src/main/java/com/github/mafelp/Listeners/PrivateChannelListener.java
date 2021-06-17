@@ -13,14 +13,31 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The listener which listens to private messages.
+ */
 public class PrivateChannelListener extends MessageCreateListener {
+    /**
+     * The logging instance to log statements to the console and the log file.
+     */
     private static final Logger logger = LogManager.getLogger(PrivateChannelListener.class);
+    /**
+     * The number of threads of this message listener.
+     */
     private static long threadID = 0;
 
+    /**
+     * The map used to save the states of all the users that have a wizard in their private chat running.
+     */
     private static final Map<User, PrivateListenerState> listenerStates = new HashMap<>();
 
+    /**
+     * The method that handles actual execution of private messages.
+     * @param messageCreateEvent The event class of the discord bot which contains useful information
+     */
     @Override
-    public void onMessageCreate(MessageCreateEvent messageCreateEvent) {
+    public void onMessageCreate(final MessageCreateEvent messageCreateEvent) {
+        // Ignore all messages that are not a private message.
         if (messageCreateEvent.isGroupMessage() || messageCreateEvent.isServerMessage()) {
             logger.debug("Message is not a private message... Ignoring it.");
             return;
@@ -31,6 +48,7 @@ public class PrivateChannelListener extends MessageCreateListener {
         Thread.currentThread().setName("PrivateMessageListener-" + threadID);
         ++threadID;
 
+        // Checks if a user sent this message.
         if (messageCreateEvent.getMessageAuthor().asUser().isEmpty()) {
             messageCreateEvent.getChannel().sendMessage(
                     new EmbedBuilder()
@@ -42,13 +60,16 @@ public class PrivateChannelListener extends MessageCreateListener {
             return;
         }
 
+        // Get which wizard is active in this channel.
         PrivateListenerState state = listenerStates.get(messageCreateEvent.getMessageAuthor().asUser().get());
 
+        // null means, the user didn't have a wizard running, yet.
         if (state == null) {
             logger.info("Message sent via private message from \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + messageCreateEvent.getReadableMessageContent() + "\"; State: NONE -> MainListener handles this message.");
             return;
         }
 
+        // Goes through the states and hands off the execution to their corresponding classes.
         switch (state) {
             case PRESENT -> {
                 PresentBuilder.getPresentBuilder(messageCreateEvent.getMessageAuthor().asUser().get()).nextStep(messageCreateEvent.getReadableMessageContent());
@@ -61,7 +82,13 @@ public class PrivateChannelListener extends MessageCreateListener {
         Thread.currentThread().setName(currentThreadName);
     }
 
-    public static boolean setListeningState(User user, PrivateListenerState listenerState)  {
+    /**
+     * The setter for a user to set the running wizard to.
+     * @param user The user to set the wizard to.
+     * @param listenerState The wizard you want to set.
+     * @return If the state was successful.
+     */
+    public static boolean setListeningState(final User user, final PrivateListenerState listenerState)  {
         PrivateListenerState currentState = listenerStates.get(user);
 
         if (currentState == null) {
@@ -81,7 +108,12 @@ public class PrivateChannelListener extends MessageCreateListener {
         return false;
     }
 
-    public static PrivateListenerState getListeningState(@NotNull User user) {
+    /**
+     * The getter for the listening state in the map.
+     * @param user The user to get the state from.
+     * @return The currently running wizard.
+     */
+    public static PrivateListenerState getListeningState(@NotNull final User user) {
         if (listenerStates.get(user) == null) {
             return PrivateListenerState.NONE;
         }
