@@ -12,17 +12,28 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class SkribblManager {
+    /**
+     * The logging instance to log statements to the console and the log file.
+     */
     private static final Logger logger = LogManager.getLogger(SkribblManager.class);
 
+    /**
+     * The map with all the skribbl words sorted by a server.
+     */
     private static final Map<Server, List<String>> skribblWordMap = new HashMap<>();
 
-    private static final File globalSkribblFile = new File(Configuration.configurationFilesFolder, "defaultSkribblWords.txt");
-
+    /**
+     * The function that gets all the skribbl words from server.
+     * @param server The server to get the skribbl words of.
+     * @return The skribbl words.
+     */
     public static List<String> getSkribblWords(Server server) {
+        // If skribbl words are configured, return them
         if (skribblWordMap.get(server) != null) {
             return skribblWordMap.get(server);
         }
 
+        // If no skribbl words are configured for this server, load them in from their file.
         File serverConfigurationFolder = Configuration.getServerConfigurationFolder(server);
         if (serverConfigurationFolder == null) {
             return new ArrayList<>();
@@ -30,6 +41,7 @@ public class SkribblManager {
         File skribblFile = new File(serverConfigurationFolder, "skribblWords.txt");
         if (skribblFile.exists()) {
             try {
+                // Read the words in line by line.
                 Scanner fileReader = new Scanner(skribblFile);
 
                 List<String> currentSkribblWords = new ArrayList<>();
@@ -57,6 +69,10 @@ public class SkribblManager {
         }
     }
 
+    /**
+     * Saves the skribbl words for a specific server.
+     * @param server The server to save the skribbl words of.
+     */
     public static void saveSkribblWords(Server server) {
         List<String> wordsToSave = getSkribblWords(server);
 
@@ -76,14 +92,19 @@ public class SkribblManager {
         }
     }
 
+    /**
+     * Added a new skribbl word to a server.
+     * @param server The server to add the word to.
+     * @param word the word you want to add.
+     */
     public static void addSkribblWord(Server server, String word) {
         if (!(word.endsWith(",")))
             word += ",";
 
         List<String> words = getSkribblWords(server);
 
+        // Check if the word already exists. If not, add it.
         boolean alreadyAdded = false;
-
         for (String s : words) {
             if (s.equalsIgnoreCase(word)) {
                 alreadyAdded = true;
@@ -96,34 +117,38 @@ public class SkribblManager {
         }
     }
 
+    /**
+     * Removes a word from the list of skribbl words.
+     * @param server The server to remove the word from.
+     * @param word The word you want to be removed.
+     * @return If the word was removed. If false, that means that the word didn't exist in the first place.
+     */
     public static boolean removeSkribblWord(Server server, String word) {
         List<String> words = getSkribblWords(server);
 
         if (!(word.endsWith(",")))
             word += ",";
 
-        boolean listChanged = false;
-
         int i = 0;
         for (String s : words) {
             if (s.equalsIgnoreCase(word)) {
                 words.remove(i);
 
-                listChanged = true;
-                break;
+                skribblWordMap.replace(server, words);
+                return true;
             }
 
              ++i;
         }
-
-        if (listChanged) {
-            skribblWordMap.replace(server, words);
-        }
-        return listChanged;
+        return false;
     }
 
+    /**
+     * Resets the skribbl words for a server.
+     * @param server The server you want to reset the words off.
+     */
     public static void resetSkribblWords(Server server) {
-        var oldWords = getSkribblWords(server);
+        List<String> oldWords = getSkribblWords(server);
 
         logger.debug("Old Skribbl words were: " + oldWords);
 
