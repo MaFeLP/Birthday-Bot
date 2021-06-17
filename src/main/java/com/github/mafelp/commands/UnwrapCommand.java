@@ -38,7 +38,7 @@ public class UnwrapCommand extends Thread {
     /**
      * The command which was being parsed with the {@link com.github.mafelp.utils.CommandParser} command parser.
      */
-    private final Command command;
+    private Command command;
 
     /**
      * Default Constructor sets thread names for this thread.
@@ -48,13 +48,13 @@ public class UnwrapCommand extends Thread {
         this.messageCreateEvent = messageCreateEvent;
 
 	// Initialises the command with the message content, not the <b>readable</b> message contents.
-        Command cmd = null;
+        command = null;
         try {
-            cmd = CommandParser.parseFromString(messageCreateEvent.getMessageContent());
-            logger.debug("Command is: " + cmd.getCommand());
+            command = CommandParser.parseFromString(messageCreateEvent.getMessageContent());
+            logger.debug("Command is: " + command.getCommand());
 
-            if (cmd.getArguments() != null)
-                logger.debug("Arguments are: " + Arrays.toString(cmd.getArguments()));
+            if (command.getArguments() != null)
+                logger.debug("Arguments are: " + Arrays.toString(command.getArguments()));
             else
                 logger.debug("Arguments are: null");
         } catch (NoCommandGivenException e) {
@@ -75,7 +75,6 @@ public class UnwrapCommand extends Thread {
                             .addField("Command not finished Exception", "Please finish your command with a quotation mark!")
             );
         }
-        this.command = cmd;
 
         this.setName("UnwrapCommand-" + threadID);
         ++threadID;
@@ -98,7 +97,7 @@ public class UnwrapCommand extends Thread {
 
 	// Check if the first argument is a valid ping to a user.
         String receiverTag = command.getStringArgument(0).get();
-        if (!receiverTag.matches("<@([!]?)[1-9]{1}[0-9]{16,18}>")) {
+        if (!receiverTag.matches("<@([!]?)[1-9][0-9]{16,18}>")) {
             sendHelpMessage(true);
             logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"unwrap\"; Response: Wrong argument.");
             return;
