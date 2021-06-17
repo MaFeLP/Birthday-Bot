@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
+/**
+ * The class that handles the building of a present in a private chat.
+ */
 public class PresentBuilder {
     /**
      * The logger, which is used to log information to the console.
