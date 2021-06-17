@@ -18,11 +18,28 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * The main listener which listens to every message sent to a discord channel.
+ */
 public class MessageCreateListener implements org.javacord.api.listener.message.MessageCreateListener {
+    /**
+     * A instance of random to generate pseudo random numbers.
+     */
     private static final Random random = new Random();
+    /**
+     * The logging instance to log statements to the console and the log file.
+     */
     private static final Logger logger = LogManager.getLogger(MessageCreateListener.class);
+    /**
+     * The number of threads of this message listener.
+     */
     private static long threadID = 0;
 
+    /**
+     * The method that handles te actual execution of the listening.
+     * @param messageCreateEvent The event class of the discord bot which contains useful information
+     *                           about the message that was being sent.
+     */
     @Override
     public void onMessageCreate(final MessageCreateEvent messageCreateEvent) {
         // Changes this threads name to make it more visible to the user, what the bot is currently doing.
@@ -30,11 +47,15 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         Thread.currentThread().setName("MainListener-" + threadID);
         ++threadID;
 
+        // Checks if the message was not the bot.
         if (messageCreateEvent.getMessageAuthor().isYourself()) {
             logger.debug("Message sent by this bot. Ignoring...");
             return;
         }
 
+        // Checks if the bot should listen to this channel.
+        // If the server has no channels configured, do additional checks and maybe add this channel
+        // to the list of listening channels.
         boolean messageSentToAllowedChannel = false;
         String content = messageCreateEvent.getReadableMessageContent();
         if (messageCreateEvent.getServer().isPresent()) {
@@ -60,9 +81,11 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                     authorized = true;
                 }
 
-                if (content.toLowerCase().startsWith("!init")) {
-                //if (content.toLowerCase().startsWith(Configuration.getServerConfiguration(messageCreateEvent.getServer().get()).getString("prefix") + "init")) {
+                /// Check if the message is init
+                if (content.toLowerCase().startsWith(Configuration.config.getString("prefix", "!") + "init")) {
+                    // Check if the message author is authorised to add a channel to the listening list.
                     if (authorized) {
+                        // Add this channel to the list of listening channels.
                         listeningChannels = new ArrayList<>();
                         listeningChannels.add(messageCreateEvent.getChannel().getId());
                         logger.debug("listeningChannelsList now: " + listeningChannels);
@@ -70,6 +93,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                         currentConfig.set("listeningChannels", listeningChannels);
                         Configuration.save(messageCreateEvent.getServer().get(), currentConfig);
 
+                        // SEnd a success message.
                         messageCreateEvent.getChannel().sendMessage(
                                 new EmbedBuilder()
                                 .setColor(Color.GREEN)
@@ -81,6 +105,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
 
                         logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"!init\"; Response: Added channel with id \"" + messageCreateEvent.getChannel().getId() + "\" to the list of listening channels.");
                     } else {
+                        // Send an permission denied embed.
                         logger.info("User \"" + messageCreateEvent.getMessageAuthor().getName() + "\" executed command \"!init\"; Response: Permission denied.");
                         logger.debug("Sending permission denied Embed.");
                         messageCreateEvent.getChannel().sendMessage(
@@ -94,7 +119,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                         return;
                     }
                 } // End of !init command.
-            // If the list of channel IDs does not have the default, get through it and look, if this channel is in it.
+            // If the list of channel IDs does not have the default, go through it and look, if this channel is in it.
             } else {
                 for (long channelID : listeningChannels) {
                     if (channelID == messageCreateEvent.getChannel().getId()) {
@@ -117,9 +142,15 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             logger.warn("Message sent to no known channel type by \"" + messageCreateEvent.getMessageAuthor().getName() + "\": " + content);
         }
 
+        // Checks that the message has a content.
         if (content == null) {
             logger.debug("No content in the message!");
             return;
+        } else {
+            if (content.equals("")) {
+                logger.debug("No content in the message!");
+                return;
+            }
         }
 
         if (!messageSentToAllowedChannel) {
@@ -137,6 +168,7 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
             return;
         }
 
+        // Parse the command.
         Command cmd = null;
         try {
             cmd = CommandParser.parseFromString(content);
@@ -164,12 +196,12 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
                     .addField("Command not finished Exception", "Please finish your command with a quotation mark!")
             );
         }
-
         if (cmd == null) {
             logger.error("command is null! Ignoring...");
             return;
         }
 
+        // Hand off execution of the command to its corresponding class.
         if (cmd.getCommand().equalsIgnoreCase(prefix + "person")) {
             PersonCommand personCommand = new PersonCommand(messageCreateEvent, members);
             personCommand.start();
@@ -178,21 +210,6 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         if (cmd.getCommand().equalsIgnoreCase(prefix + "game")) {
             GameCommand gameCommand = new GameCommand(messageCreateEvent, games);
             gameCommand.start();
-        } else
-
-        if (cmd.getCommand().equalsIgnoreCase(prefix + "randomPlay")) {
-            logger.debug("Executing command randomPlay...");
-            int r = random.nextInt(happyBirthdaySongs.size());
-
-            logger.debug("Sending play message...");
-            new MessageBuilder()
-                    .append("!play ")
-                    .append(happyBirthdaySongs.get(r))
-                    .send(messageCreateEvent.getChannel())
-            ;
-
-            logger.debug("Play message sent.");
-            logger.debug("Executed command randomPlay.");
         } else
 
         if (cmd.getCommand().equalsIgnoreCase(prefix + "random")) {
@@ -223,8 +240,23 @@ public class MessageCreateListener implements org.javacord.api.listener.message.
         if (cmd.getCommand().equalsIgnoreCase(prefix + "birthday")) {
             BirthdayCommand birthdayCommand = new BirthdayCommand(cmd, messageCreateEvent);
             birthdayCommand.start();
-        }
+        } else
 
+        // The command randomPlay currently does not have a functionality. Will be done later.
+        if (cmd.getCommand().equalsIgnoreCase(prefix + "randomPlay")) {
+            logger.debug("Executing command randomPlay...");
+            int r = random.nextInt(happyBirthdaySongs.size());
+
+            logger.debug("Sending play message...");
+            new MessageBuilder()
+                    .append("!play ")
+                    .append(happyBirthdaySongs.get(r))
+                    .send(messageCreateEvent.getChannel())
+            ;
+
+            logger.debug("Play message sent.");
+            logger.debug("Executed command randomPlay.");
+        }
 
         // Removes name changes from this thread.
         Thread.currentThread().setName(currentThreadName);
