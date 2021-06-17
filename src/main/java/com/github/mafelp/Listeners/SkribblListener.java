@@ -18,31 +18,51 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The listener which listens to all messages and if they are in a skribbl listening channel,
+ * adds them to the list of skribbl words.
+ */
 public class SkribblListener extends MessageCreateListener {
+    /**
+     * The logging instance to log statements to the console and the log file.
+     */
     private static final Logger logger = LogManager.getLogger(SkribblListener.class);
 
+    /**
+     * The list of channels which are defined as listening channel:
+     * Only add skribbl words to their corresponding file if the channel appears in this list.
+     */
     private static final List<ServerTextChannel> listeningChannels = new ArrayList<>();
 
+    /**
+     * The method that handles the actual execution of the handling of the skribbl words.
+     * @param messageCreateEvent The event class of the discord bot which contains useful information
+     */
     @Override
-    public void onMessageCreate(MessageCreateEvent messageCreateEvent) {
+    public void onMessageCreate(final MessageCreateEvent messageCreateEvent) {
+        // Check if the message was NOT sent by this bot.
         if (messageCreateEvent.getMessageAuthor().isYourself()) {
             logger.debug("Message was sent by this bot. Ignoring...");
             return;
         }
 
+        // Check if the message was even sent on a server.
         if (messageCreateEvent.getServerTextChannel().isEmpty()) {
             logger.debug("Message was not sent to a skribbl listening channel...");
             return;
         }
 
-        ServerTextChannel serverTextChannel = messageCreateEvent.getServerTextChannel().get();
-        Server server = serverTextChannel.getServer();
+        // Set some useful variables for later on.
+        final ServerTextChannel serverTextChannel = messageCreateEvent.getServerTextChannel().get();
+        final Server server = serverTextChannel.getServer();
 
+        // Checks if the message is a command: If so, do not add the word to the skribbl list.
         if (messageCreateEvent.getReadableMessageContent().startsWith(Objects.requireNonNull(Configuration.getServerConfiguration(server).getString("prefix", "!")))) {
             logger.debug("Message is a command. Not treating it as a skribblWord.");
             return;
         }
 
+        // Checks if the message was sent to a listening channel configured channel.
         boolean isListeningChannel = false;
         for (ServerTextChannel i : listeningChannels) {
             if (serverTextChannel.equals(i)) {
@@ -51,14 +71,14 @@ public class SkribblListener extends MessageCreateListener {
                 break;
             }
         }
-
         if (!isListeningChannel) {
             logger.debug("Channel is not a skibbl Listening channel!");
             return;
         }
 
+        // Parses the words with the command parser.
         try {
-            Command command = CommandParser.parseFromString(messageCreateEvent.getReadableMessageContent());
+            final Command command = CommandParser.parseFromString(messageCreateEvent.getReadableMessageContent());
             SkribblManager.addSkribblWord(server, command.getCommand());
 
             if (command.getArguments() != null) {
@@ -76,17 +96,27 @@ public class SkribblListener extends MessageCreateListener {
         }
     }
 
+    /**
+     * The getter for the listening channels.
+     * @return the listening channels.
+     */
     public static List<ServerTextChannel> getListeningChannels() {
         return listeningChannels;
     }
 
-    public static List<ServerTextChannel> addListeningChannel(ServerTextChannel channelToAdd) {
+    /**
+     * The method that attaches this listener to a channel.
+     * @param channelToAdd The channel to attach to.
+     */
+    public static void addListeningChannel(ServerTextChannel channelToAdd) {
         listeningChannels.add(channelToAdd);
-        return listeningChannels;
     }
 
-    public static List<ServerTextChannel> removeListeningChannel(ServerTextChannel channelToRemove) {
+    /**
+     * The method that detaches this listener from a channel.
+     * @param channelToRemove The channel to detach from.
+     */
+    public static void removeListeningChannel(ServerTextChannel channelToRemove) {
         listeningChannels.removeAll(Collections.singleton(channelToRemove));
-        return listeningChannels;
     }
 }
