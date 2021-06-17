@@ -14,10 +14,23 @@ import org.javacord.api.DiscordApiBuilder;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 
+/**
+ * The main class that is being called on startup.
+ */
 public class Main {
+    /**
+     * The logger used to log statements to the console and the log file.
+     */
     private static final Logger logger = LogManager.getLogger(Main.class);
+    /**
+     * The main discord API that connects to the discord servers and initialises callbacks.
+     */
     public static DiscordApi discordApi;
 
+    /**
+     * The main Method called on startup.
+     * @param args The additional arguments given to this program.
+     */
     public static void main(String[] args) {
         logger.info("Starting Birthday-Bot version 1.4-beta");
 
@@ -29,6 +42,32 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new ShutdownProcess(false));
     }
 
+    /**
+     * The method that handles all the tasks that should be executed <b>before</b> the bot is being logged in.
+     */
+    public static void preStartup() {
+        String oldName = Thread.currentThread().getName();
+        Thread.currentThread().setName("PreStartup-Worker");
+
+        logger.info("Loading global configuration...");
+        Configuration.loadGlobalConfiguration();
+        logger.debug("Current configuration is: \n" + Configuration.config.saveToString());
+        logger.info("Global configuration loaded!");
+
+        if (Configuration.config.get("apiToken") == null || Objects.equals(Configuration.config.get("apiToken"), "<Your Token goes here>")) {
+            logger.fatal("No API Token configured!");
+            logger.fatal("Please head to the config.yml file and set the value for \"apiToken:\" to your api token!");
+            logger.info("The api token can be found here: https://discord.com/developers/applications/ !");
+            logger.fatal("Exiting...");
+            System.exit(1);
+        }
+
+        Thread.currentThread().setName(oldName);
+    }
+
+    /**
+     * The method that handles logging in of the discord bot.
+     */
     public static void logIn() {
         logger.info("Starting bot instance...");
         logger.info("Using api token: " + Configuration.config.getString("apiToken"));
@@ -51,26 +90,9 @@ public class Main {
         }
     }
 
-    public static void preStartup() {
-        String oldName = Thread.currentThread().getName();
-        Thread.currentThread().setName("PreStartup-Worker");
-
-        logger.info("Loading global configuration...");
-        Configuration.loadGlobalConfiguration();
-        logger.debug("Current configuration is: \n" + Configuration.config.saveToString());
-        logger.info("Global configuration loaded!");
-
-        if (Configuration.config.get("apiToken") == null || Objects.equals(Configuration.config.get("apiToken"), "<Your Token goes here>")) {
-            logger.fatal("No API Token configured!");
-            logger.fatal("Please head to the config.yml file and set the value for \"apiToken:\" to your api token!");
-            logger.info("The api token can be found here: https://discord.com/developers/applications/ !");
-            logger.fatal("Exiting...");
-            System.exit(1);
-        }
-
-        Thread.currentThread().setName(oldName);
-    }
-
+    /**
+     * The method that handles all the tasks that should be done <b>after</b> the bot has been logged in.
+     */
     public static void postStartup() {
         String oldName = Thread.currentThread().getName();
         Thread.currentThread().setName("PostStartup-Worker");
